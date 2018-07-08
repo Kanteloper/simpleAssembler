@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 		// check label
 		if(!reti)
 		{
-			printf("match:%s\n", str);
+			// store label in symbol table
 		}
 		
 	}
