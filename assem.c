@@ -8,8 +8,11 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
+#include "hash.h"
 #define SYM_MAX 30
 #define STR_MAX 15
+
+int MyHashFunc(int k);
 
 int main(int argc, char** argv)
 {
@@ -19,7 +22,7 @@ int main(int argc, char** argv)
 	regex_t regex;
 	int reti;
 	int lc = 0; // location counter
-	char** symTab[SYM_MAX]; // symbol table
+	HashTable* symTab; // symbol table
 
 	// check parameter
 	if(argc < 2) 
@@ -42,6 +45,10 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
+	// create symbol table
+	symTab = createTable(TB_MAX, MyHashFunc);
+	puts("Hash table create!");
+
 	// start first pass
 	while(fscanf(fp, "%s", str) != EOF) { 
 
@@ -62,3 +69,14 @@ int main(int argc, char** argv)
 	// store symbol in symbol table
 	return 0;
 }
+
+/**
+ *@brief my hash function
+ *@param int $k my hash key
+ *@return int
+ */
+int MyHashFunc(int k)
+{
+	return k % 20;
+}
+

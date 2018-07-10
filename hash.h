@@ -27,4 +27,6 @@ typedef struct _hash_table
 	struct _hash_node** table;
 } HashTable;
 
+HashTable* createTable(int size, HashFunc* f);
+
 #endif
