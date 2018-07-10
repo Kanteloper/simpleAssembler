@@ -28,5 +28,6 @@ typedef struct _hash_table
 } HashTable;
 
 HashTable* createTable(int size, HashFunc* f);
+void HashInsert(HashTable* ht, char* lb);
 
 #endif

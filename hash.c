@@ -39,8 +39,17 @@ HashTable* createTable(int size, HashFunc* f)
 		hTable->table[i]->hf = f;  // register hash function
 		hTable->table[i]->list = NULL;
 	}
-	
 	return hTable;
+}
+
+/**
+ * @brief insert data to hash Table
+ * @param HashTable* $hTable 
+ * @param char* lb label
+ */
+void HashInsert(HashTable* ht, char* lb)
+{
+
 }
 
 

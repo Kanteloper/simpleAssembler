@@ -47,7 +47,6 @@ int main(int argc, char** argv)
 
 	// create symbol table
 	symTab = createTable(TB_MAX, MyHashFunc);
-	puts("Hash table create!");
 
 	// start first pass
 	while(fscanf(fp, "%s", str) != EOF) { 
