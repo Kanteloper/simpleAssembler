@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "hash.h"
+#include "linkedList.h"
 
 /**
  * @brief initiate and create hash Table
@@ -23,33 +24,29 @@ HashTable* createTable(int size, HashFunc* f)
 		fprintf(stderr, "memory allocation fail : Hash table\n");
 		exit(1);
 	}
+
+	// create linkedList
+	hTable->list = (List**)malloc(sizeof(List*) * size);
 	
 	// init
-	hTable->num = 0; 
-	hTable->table = (HashNode**)malloc(sizeof(HashNode*) * size); 
-	
-	for(int i = 0; i < size; i++) // allocate memory for hash table
+	for( int i = 0; i < size; i++ )
 	{
-		hTable->table[i] = (HashNode*)malloc(sizeof(HashNode));
-		if(!hTable->table[i])
-		{
-			fprintf(stderr, "memory allocation fail : Hash node\n");
-			exit(1);
-		}
-		hTable->table[i]->hf = f;  // register hash function
-		hTable->table[i]->list = NULL;
+		hTable->list[i] = 	
 	}
+	
 	return hTable;
 }
 
 /**
  * @brief insert data to hash Table
  * @param HashTable* $hTable 
- * @param char* lb label
+ * @param int k key
+ * @param char* v label
  */
-void HashInsert(HashTable* ht, char* lb)
+void HashInsert(HashTable* ht, int k, char* v)
 {
-
+	int hv = ht
+	HashTable* first = ht->table[]; 
 }
 
 
