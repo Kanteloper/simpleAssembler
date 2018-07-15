@@ -8,13 +8,16 @@
 
 typedef int HashFunc(Key k);
 
+typedef char* Value;
+
 typedef struct _hash_table
 {
 	HashFunc* hf;
-	struct List** list;
+	List** list;
 } HashTable;
 
 HashTable* createTable(int size, HashFunc* f);
-void HashInsert(HashTable* ht, char* lb);
+void HashInsert(HashTable* ht, int k, char* lb);
+Value HashSearch(HashTable* ht, Key k);
 
 #endif

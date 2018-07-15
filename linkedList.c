@@ -11,11 +11,10 @@
 /**
  * @brief create linked list
  * @param List* plist
- * @return List* 
  */
-List* creatList()
+void initList(List* plist)
 {
-	List* plist = (List*)malloc(sizeof(List));
+	plist = (List*)malloc(sizeof(List));
 	if(!plist)
 	{
 		fprintf(stderr, "memory allocation fail : linked list\n");
@@ -23,15 +22,5 @@ List* creatList()
 	}
 	plist->head = NULL;
 	plist->tail = NULL;
-	return plist;
-}
-
-/**
- * @brief init linked list
- * @param List* pArr
- */
-void ListInit()
-{
-
 }
 

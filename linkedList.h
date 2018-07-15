@@ -21,4 +21,6 @@ typedef struct _linked_list
 
 typedef LinkedList List;
 
-List* createList();
+void creatList(List* plist);
+
+#endif

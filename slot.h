@@ -5,8 +5,8 @@ typedef int Key;
 
 typedef struct _slot
 {
-	char* label;
 	int addr; // location counter
+	char* value;
 } Slot;
 
 #endif

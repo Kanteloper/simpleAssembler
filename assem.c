@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
+#include "linkedList.h"
 #include "hash.h"
 #define SYM_MAX 30
 #define STR_MAX 15
@@ -40,10 +41,6 @@ int main(int argc, char** argv)
 
 	// compile regular expression
 	reti = regcomp(&regex, "[:]", 0); if(reti)
-	{
-		fprintf(stderr, "failed to compile regex\n");
-		exit(1);
-	}
 
 	// create symbol table
 	symTab = createTable(TB_MAX, MyHashFunc);
@@ -51,13 +48,20 @@ int main(int argc, char** argv)
 	// start first pass
 	while(fscanf(fp, "%s", str) != EOF) { 
 
-		// excute regular expression
-		reti = regexec(&regex, str, 0, NULL, 0);
-		// check label
-		if(!reti)
+		reti = regexec(&regex, str, 0, NULL, 0); // execute regex
+		if(!reti) // if label
 		{
-			// store label in symbol table
+			HashInsert(symTab, lc, str); // store label
+			lc++; // increate location counter
 		}
+		else // if not label
+		{
+			if(feof(fp)) break; // if EOF, go to second pass
+			lc++;
+		}
+
+		// search .word
+		// if .word, add 4 location counter
 		
 	}
 
