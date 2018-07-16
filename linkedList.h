@@ -21,6 +21,7 @@ typedef struct _linked_list
 
 typedef LinkedList List;
 
-void creatList(List* plist);
+List* initList();
+Value searchList(List* pl, Key k);
 
 #endif

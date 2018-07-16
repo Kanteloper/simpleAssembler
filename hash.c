@@ -29,9 +29,10 @@ HashTable* createTable(int size, HashFunc* f)
 	hTable->list = (List**)malloc(sizeof(List*) * size);
 	for( int i = 0; i < size; i++ )
 		// create linked list
-		initList(&hTable->list[i]);
+		hTable->list[i] = initList();
 
 	// register hash function
+	hTable->hf = (HashFunc*)malloc(sizeof(HashFunc));
 	hTable->hf = f;
 	return hTable;
 }
@@ -44,19 +45,19 @@ HashTable* createTable(int size, HashFunc* f)
  */
 void HashInsert(HashTable* ht, Key k, Value v)
 {
-	int hv = ht->hf(k); // get hash value
-	Data newData = { k, v }; 
+	int hv = ht->hf(k); // get hash Value
 
 	// check dup
-	if(HashSearch(ht, k) != NULL) // if duplicated
-	{
-		// display error
-	}
-	else // if not 
-	{
-		// insert data in list
-
-	}
+	//if(HashSearch(ht, k) != NULL)  if duplicated
+	//{
+		//fprintf(stderr, "error: key duplication\n");
+		//return;
+	//}
+	//else  if not 
+	//{
+		//puts("work");
+		//insertList(ht->list[hv], newData);  insert data
+	//}
 }
 
 /**
@@ -70,7 +71,7 @@ Value HashSearch(HashTable* ht, Key k)
 {
 	int hv = ht->hf(k);
 	Value val;
-	if((val = searchList(&(ht->list[hv]))) != NULL)
+	if((val = searchList((ht->list[hv]), k)) != NULL)
 	{
 		return val;
 	}

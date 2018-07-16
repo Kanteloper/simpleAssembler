@@ -20,8 +20,10 @@ int main(int argc, char** argv)
 	FILE *fp;
 	char str[STR_MAX];
 	char regmsg[100];
-	regex_t regex;
-	int reti;
+	regex_t rg_lb; // pointer for label regex
+	regex_t rg_w; 
+	int rt_lb; // regcomp return value for label
+	int rt_w; // regcomp return value for .word
 	int lc = 0; // location counter
 	HashTable* symTab; // symbol table
 
@@ -40,7 +42,8 @@ int main(int argc, char** argv)
 	}
 
 	// compile regular expression
-	reti = regcomp(&regex, "[:]", 0); if(reti)
+	rt_lb = regcomp(&rg_lb, "[:]", 0); 
+	rt_w = regcomp(&rg_w, "[.][w][o][r][d]", 0);
 
 	// create symbol table
 	symTab = createTable(TB_MAX, MyHashFunc);
@@ -48,25 +51,24 @@ int main(int argc, char** argv)
 	// start first pass
 	while(fscanf(fp, "%s", str) != EOF) { 
 
-		reti = regexec(&regex, str, 0, NULL, 0); // execute regex
-		if(!reti) // if label
+		rt_lb = regexec(&rg_lb, str, 0, NULL, 0); // execute regex
+		if(!rt_lb) // if label
 		{
-			HashInsert(symTab, lc, str); // store label
+			printf("%s, %d\n", str, lc);
+			//HashInsert(symTab, lc, str); // store label
 			lc++; // increate location counter
 		}
-		else // if not label
-		{
-			if(feof(fp)) break; // if EOF, go to second pass
-			lc++;
-		}
 
-		// search .word
-		// if .word, add 4 location counter
-		
+		rt_w = regexec(&rg_w, str, 0, NULL, 0);
+		if(!rt_w) // if .word
+		{
+			// add +3 to location counter
+			lc += 3;
+		}
 	}
 
 	fclose(fp);
-	regfree(&regex);
+	regfree(&rg_lb);
 
 	// check that there is a symbol in label field
 	// store symbol in symbol table

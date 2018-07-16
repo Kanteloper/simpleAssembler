@@ -8,8 +8,6 @@
 
 typedef int HashFunc(Key k);
 
-typedef char* Value;
-
 typedef struct _hash_table
 {
 	HashFunc* hf;

@@ -2,6 +2,7 @@
 #define __SLOT_H
 
 typedef int Key;
+typedef char* Value;
 
 typedef struct _slot
 {
