@@ -46,18 +46,18 @@ HashTable* createTable(int size, HashFunc* f)
 void HashInsert(HashTable* ht, Key k, Value v)
 {
 	int hv = ht->hf(k); // get hash Value
+	Data newData  = { k , v }; 
 
-	// check dup
-	//if(HashSearch(ht, k) != NULL)  if duplicated
-	//{
-		//fprintf(stderr, "error: key duplication\n");
-		//return;
-	//}
-	//else  if not 
-	//{
-		//puts("work");
-		//insertList(ht->list[hv], newData);  insert data
-	//}
+	if(HashSearch(ht, k) != NULL)  //if duplicated
+	{
+		fprintf(stderr, "error: key duplication\n");
+		return;
+	}
+	else //if not 
+	{
+		puts("not dup");
+		insertList(ht->list[hv], newData); // insert data
+	}
 }
 
 /**
@@ -78,3 +78,4 @@ Value HashSearch(HashTable* ht, Key k)
 
 	return NULL;
 }
+

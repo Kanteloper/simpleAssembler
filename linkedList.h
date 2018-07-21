@@ -23,5 +23,6 @@ typedef LinkedList List;
 
 List* initList();
 Value searchList(List* pl, Key k);
+void insertList(List* pl, Data nd);
 
 #endif

@@ -4,10 +4,9 @@
  * Detail : implement linked list
  */
 
-#include "linkedList.h"
-#include "hash.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "linkedList.h"
 
 /**
  * @brief create linked list
@@ -46,12 +45,31 @@ Value searchList(List* pl, Key k)
 
 /**
  * @brief insert data in linked list
- * @param HashTable* $ht
- * @param Data $new
+ * @param List* $pl
+ * @param Data $nd
  */
-void insertList(HashTable* ht, Data new)
+void insertList(List* pl, Data nd)
 {
-	
+	puts("insert list");
+	Node* newNode = (Node*)malloc(sizeof(Node));
+	if(!newNode)
+	{
+		fprintf(stderr, "memory allocation fail : new Node\n");
+		exit(1);
+	}
+	newNode->data = nd;
+	newNode->next = NULL;
+
+	if(pl->head == NULL) // if first node
+	{
+		puts("head first");
+		pl->head = newNode;
+	}
+	else // if not
+	{
+		puts("start second");
+	}
+	// if not, set head next and set tail
 }
 
 
