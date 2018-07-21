@@ -4,7 +4,7 @@
 #include "slot.h"
 #include "linkedList.h"
 
-#define TB_MAX 20
+#define TB_MAX 50
 
 typedef int HashFunc(Key k);
 
@@ -15,7 +15,7 @@ typedef struct _hash_table
 } HashTable;
 
 HashTable* createTable(int size, HashFunc* f);
-void HashInsert(HashTable* ht, int k, char* lb);
+void HashInsert(HashTable* ht, Key k, Value lb);
 Value HashSearch(HashTable* ht, Key k);
 
 #endif

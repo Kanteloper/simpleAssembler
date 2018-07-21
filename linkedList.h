@@ -11,8 +11,6 @@ typedef struct _node
 	struct _node* next;
 } Node;
 
-typedef int HashFunc(Key k);
-
 typedef struct _linked_list
 {
 	Node* head;

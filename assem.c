@@ -12,9 +12,10 @@
 #include "hash.h"
 #define SYM_MAX 30
 #define STR_MAX 15
+//#define DEBUG
 
-int symHashFunc(int k);
-int opHashFunc(int k);
+int symHashFunc(Key k);
+int opHashFunc(Key k);
 void setOpTab(HashTable* ot);
 
 int main(int argc, char** argv)
@@ -36,12 +37,22 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
+#ifndef DEBUG
 	// open string file
 	if((fp = fopen(argv[1], "r")) == NULL)
 	{
 		fprintf(stderr, "failed to open a file\n");
 		exit(1);
 	}
+#endif
+
+#ifdef DEBUG
+	if((fp = fopen("example1.txt", "r")) == NULL)
+	{
+		fprintf(stderr, "failed to open a file\n");
+		exit(1);
+	}
+#endif
 
 	// compile regular expression
 	rt_lb = regcomp(&rg_lb, "[:]", 0); 
@@ -90,13 +101,14 @@ int main(int argc, char** argv)
 			//puts(str);
 		//}
 
-
-
 	}
 
 	fclose(fp);
 	regfree(&rg_lb);
-
+	regfree(&rg_w);
+	regfree(&rg_op);
+	free(symTab);
+	free(opTab);
 	// check that there is a symbol in label field
 	// store symbol in symbol table
 	return 0;
@@ -107,7 +119,7 @@ int main(int argc, char** argv)
  * @param int $k location counter 
  * @return int
  */
-int symHashFunc(int k)
+int symHashFunc(Key k)
 {
 	return k % 20;
 }
@@ -117,7 +129,7 @@ int symHashFunc(int k)
  * @param int $k operation code
  * @return int
  */
-int opHashFunc(int k)
+int opHashFunc(Key k)
 {
 	return k | 0x00; 
 }
@@ -131,4 +143,21 @@ void setOpTab(HashTable* ot)
 	HashInsert(ot, 0x09, "addiu");
 	HashInsert(ot, 0x03, "jal");
 	HashInsert(ot, 0x0d, "ori");
+	HashInsert(ot, 0x21, "addu");
+	HashInsert(ot, 0x08, "jr");
+	HashInsert(ot, 0x0b, "sltiu");
+	//HashInsert(ot, 0x24, "and");
+	HashInsert(ot, 0x0f, "lui");
+	//HashInsert(ot, 0x2b, "sltu");
+	HashInsert(ot, 0x0c, "andi");
+	//HashInsert(ot, 0x23, "lw");
+	HashInsert(ot, 0x00, "sll");
+	HashInsert(ot, 0x04, "beq");
+	HashInsert(ot, 0x02, "srl");
+	HashInsert(ot, 0x05, "bne");
+	//HashInsert(ot, 0x27, "nor");
+	//HashInsert(ot, 0x2b, "sw");
+	HashInsert(ot, 0x02, "j");
+	//HashInsert(ot, 0x25, "or");
+	//HashInsert(ot, 0x23, "subu");
 }

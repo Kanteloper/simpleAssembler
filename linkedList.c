@@ -34,8 +34,10 @@ List* initList()
  */
 Value searchList(List* pl, Key k)
 {
+	printf("address : %p\n", pl);
 	Node* sp = pl->head;
-	while(sp)
+	puts("search list");
+	while(sp) 
 	{
 		if(sp->data.addr == k) return sp->data.value; // if found
 		sp = sp->next;
@@ -68,6 +70,8 @@ void insertList(List* pl, Data nd)
 	else // if not
 	{
 		puts("start second");
+
+
 	}
 	// if not, set head next and set tail
 }
