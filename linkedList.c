@@ -18,7 +18,6 @@ List* initList()
 	List* plist = (List*)malloc(sizeof(List));
 	plist->head = NULL;
 	plist->tail = NULL;
-
 	return plist;
 }
 
@@ -33,10 +32,7 @@ Value searchList(List* pl, Value v)
 	Node* sp = pl->head;
 	while(sp) 
 	{
-		if(strcmp(sp->data.value, v) == 0) 
-		{
-			return sp->data.value;
-		}
+		if(strcmp(sp->data.value, v) == 0) return sp->data.value;
 		sp = sp->next;
 	}
 	return NULL;

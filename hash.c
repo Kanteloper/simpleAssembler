@@ -20,11 +20,6 @@ HashTable* createTable(int size, HashFunc* f)
 {
 	// create hash table
 	HashTable* hTable = (HashTable*)malloc(sizeof(HashTable));
-	if(!hTable)
-	{
-		fprintf(stderr, "memory allocation fail : Hash table\n");
-		exit(1);
-	}
 
 	// init hash table
 	hTable->list = (List**)malloc(sizeof(List*) * size);

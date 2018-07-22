@@ -85,6 +85,9 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// start second pass
+	//
+
 	fclose(fp);
 	regfree(&rg_lb);
 	free(opTab);
