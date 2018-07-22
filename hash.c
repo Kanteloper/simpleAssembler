@@ -50,12 +50,11 @@ void HashInsert(HashTable* ht, Key k, Value v)
 
 	if(isDuplicated(ht, k, v))  //if duplicated
 	{
-		fprintf(stderr, "error: key duplication = %s\n", v);
+		fprintf(stderr, "error: key duplication = %s, %d\n", v, k);
 		return;
 	}
 	else //if not 
 	{	
-		puts("data insert");
 		insertList(ht->list[hv], newData); // insert data
 	}
 }
@@ -75,7 +74,6 @@ Value HashSearch(HashTable* ht, Key k, Value v)
 	{
 		return val;
 	}
-	
 	return NULL;
 }
 

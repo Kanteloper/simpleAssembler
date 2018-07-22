@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 	FILE *fp;
 	char str[STR_MAX];
 	// key for opTab
-	int opKey[22] = { 0x01, 0x09, 0x03, 0x0d, 0x21, 0x08, 0x0b, 0x24, 0x0f, 
-		0x2b, 0x0c, 0x23, 0x00, 0x04, 0x02, 0x05, 0x27, 0x2b, 0x02, 0x25, 0x23, 0x1c};
+	int opKey[19] = { 0x01, 0x09, 0x03, 0x0d, 0x21, 0x08, 0x0b, 0x24, 0x0f, 
+		0x2b, 0x0c, 0x23, 0x00, 0x04, 0x02, 0x05, 0x27, 0x25, 0x1c};
 	char regmsg[100];
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
@@ -58,25 +58,31 @@ int main(int argc, char** argv)
 	// start first pass
 	while(fscanf(fp, "%s", str) != EOF) 
 	{ 
-		Value op;
+		char* label;
 		rt_lb = regexec(&rg_lb, str, 0, NULL, 0); // execute regex
 		if(!rt_lb) // if label
 		{
-			HashInsert(symTab, lc, str); // store label
+			label = strtok(str, ":");
+			printf("label: %s, lc: %d\n", label, lc);
+			//HashInsert(symTab, lc, label); // store label
 			lc++; // increate location counter
 		}
-
-		//for(int i = 0; i < 22; i++)
-		//{
-			//// search optable
-			//if(strcmp(str, HashSearch(opTab, opKey[i], str)) == 0) { 
-				//// if .word
-				//if(strcmp(str, ".word") == 0)
-					//lc += 3;
-				//else // other operators
-					//lc += 4;
-			//}
-		//}
+		else // if not
+		{
+			for(int i = 0; i < 19; i++)
+			{
+				// search optable
+				if(HashSearch(opTab, opKey[i], str) != NULL) 
+				{ 
+					printf("op : %s, lc: %d\n", str, lc);
+					// if .word
+					if(strcmp(str, ".word") == 0)
+						lc += 3;
+					else // other operators
+						lc += 4;
+				}
+			}
+		}
 	}
 
 	fclose(fp);
