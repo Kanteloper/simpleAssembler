@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "linkedList.h"
 
 /**
@@ -15,11 +16,6 @@
 List* initList()
 {
 	List* plist = (List*)malloc(sizeof(List));
-	if(!plist)
-	{
-		fprintf(stderr, "memory allocation fail : linked list\n");
-		exit(1);
-	}
 	plist->head = NULL;
 	plist->tail = NULL;
 
@@ -29,15 +25,18 @@ List* initList()
 /**
  * @brief search data with key in linked list
  * @param List* $pl
- * @param Key k
+ * @param Value $v
  * @return Value
  */
-Value searchList(List* pl, Key k)
+Value searchList(List* pl, Value v)
 {
 	Node* sp = pl->head;
 	while(sp) 
 	{
-		if(sp->data.addr == k) return sp->data.value; // if found
+		if(strcmp(sp->data.value, v) == 0) 
+		{
+			return sp->data.value;
+		}
 		sp = sp->next;
 	}
 	return NULL;
@@ -56,16 +55,13 @@ void insertList(List* pl, Data nd)
 
 	if(pl->head == NULL) // if first node
 	{
-		puts("head first");
-		pl->head = newNode;
+		pl->head = pl->tail = newNode;
 	}
 	else // if not
 	{
-		puts("start second");
-
-
+		pl->head->next = newNode;
+		pl->tail = newNode;
 	}
-	// if not, set head next and set tail
 }
 
 

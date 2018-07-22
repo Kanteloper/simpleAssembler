@@ -7,7 +7,7 @@ hash.o: slot.h hash.h hash.c  linkedList.h
 assem.o: assem.c hash.h linkedList.h
 	gcc -O0 -g -o assem.o -c assem.c
 
-list.o: linkedList.c linkedList.h
+list.o: slot.h linkedList.c linkedList.h
 	gcc -O0 -g -o list.o -c linkedList.c
 
 clean:

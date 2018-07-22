@@ -30,6 +30,7 @@ int main(int argc, char** argv)
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
 	HashTable* opTab; // operator table
+	HashTable* symTab; // symbol table 
 
 	// check parameter
 	if(argc < 2) 
@@ -52,39 +53,49 @@ int main(int argc, char** argv)
 	opTab = createTable(TB_MAX, opHashFunc);
 	setOpTab(opTab);
 
-	// start first pass
-	while(fscanf(fp, "%s", str) != EOF) { 
+	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
+	// start first pass
+	while(fscanf(fp, "%s", str) != EOF) 
+	{ 
+		Value op;
 		rt_lb = regexec(&rg_lb, str, 0, NULL, 0); // execute regex
 		if(!rt_lb) // if label
 		{
-			printf("%s, %d\n", str, lc);
+			HashInsert(symTab, lc, str); // store label
 			lc++; // increate location counter
 		}
 
-		for(int i = 0; i < 22; i++)
-		{
-			// search optable
-			if(strcmp(str, HashSearch(opTab, opKey[i])) == 0) { 
-				printf("%s, %d\n", str, lc);
-				// if .word
-				if(strcmp(str, ".word") == 0)
-					lc += 3;
-				else // other operators
-					lc += 4;
-			}
-		}
-
-
-
+		//for(int i = 0; i < 22; i++)
+		//{
+			//// search optable
+			//if(strcmp(str, HashSearch(opTab, opKey[i], str)) == 0) { 
+				//// if .word
+				//if(strcmp(str, ".word") == 0)
+					//lc += 3;
+				//else // other operators
+					//lc += 4;
+			//}
+		//}
 	}
 
 	fclose(fp);
 	regfree(&rg_lb);
 	free(opTab);
+	free(symTab);
 	// check that there is a symbol in label field
 	// store symbol in symbol table
 	return 0;
+}
+
+/**
+ * @brief hash function for symbol table 
+ * @param int $k location counter 
+ * @return int
+ */
+int symHashFunc(Key k)
+{
+	return k % 20;
 }
 
 /** 

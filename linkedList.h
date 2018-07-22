@@ -20,7 +20,7 @@ typedef struct _linked_list
 typedef LinkedList List;
 
 List* initList();
-Value searchList(List* pl, Key k);
+Value searchList(List* pl, Value v);
 void insertList(List* pl, Data nd);
 
 #endif

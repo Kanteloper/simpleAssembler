@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "hash.h"
 #include "linkedList.h"
 
@@ -40,21 +41,21 @@ HashTable* createTable(int size, HashFunc* f)
  * @brief insert data to hash Table
  * @param HashTable* $ht 
  * @param Key $k key
- * @param char* $v label
+ * @param Value $v label
  */
 void HashInsert(HashTable* ht, Key k, Value v)
 {
 	int hv = ht->hf(k); // get hash Value
-	Data newData  = { k , v }; 
+	Data newData = { k, v };
 
-	if(HashSearch(ht, k) != NULL)  //if duplicated
+	if(isDuplicated(ht, k, v))  //if duplicated
 	{
-		fprintf(stderr, "error: key duplication\n");
+		fprintf(stderr, "error: key duplication = %s\n", v);
 		return;
 	}
 	else //if not 
-	{
-		puts("not dup");
+	{	
+		puts("data insert");
 		insertList(ht->list[hv], newData); // insert data
 	}
 }
@@ -66,11 +67,11 @@ void HashInsert(HashTable* ht, Key k, Value v)
  * @param Value $v 
  * @return Value
  */
-Value HashSearch(HashTable* ht, Key k)
+Value HashSearch(HashTable* ht, Key k, Value v)
 {
 	int hv = ht->hf(k);
 	Value val;
-	if((val = searchList((ht->list[hv]), k)) != NULL)
+	if((val = searchList((ht->list[hv]), v)) != NULL)
 	{
 		return val;
 	}
@@ -78,3 +79,20 @@ Value HashSearch(HashTable* ht, Key k)
 	return NULL;
 }
 
+/**
+ * @brief check duplicated data
+ * @param HashTable* $ht 
+ * @param Key $k
+ * @param Value $v
+ * return bool
+ */
+bool isDuplicated(HashTable* ht, Key k, Value v)
+{
+	int hv = ht->hf(k);
+	Value val;
+	if((val = searchList((ht->list[hv]), v)) != NULL)
+	{
+		return true;
+	}
+	return false;
+}
