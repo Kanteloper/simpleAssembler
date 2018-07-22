@@ -34,9 +34,7 @@ List* initList()
  */
 Value searchList(List* pl, Key k)
 {
-	printf("address : %p\n", pl);
 	Node* sp = pl->head;
-	puts("search list");
 	while(sp) 
 	{
 		if(sp->data.addr == k) return sp->data.value; // if found
@@ -52,13 +50,7 @@ Value searchList(List* pl, Key k)
  */
 void insertList(List* pl, Data nd)
 {
-	puts("insert list");
 	Node* newNode = (Node*)malloc(sizeof(Node));
-	if(!newNode)
-	{
-		fprintf(stderr, "memory allocation fail : new Node\n");
-		exit(1);
-	}
 	newNode->data = nd;
 	newNode->next = NULL;
 

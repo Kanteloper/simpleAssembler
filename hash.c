@@ -68,9 +68,7 @@ void HashInsert(HashTable* ht, Key k, Value v)
  */
 Value HashSearch(HashTable* ht, Key k)
 {
-	puts("Hash search");
 	int hv = ht->hf(k);
-	printf("hash value : %d\n", hv);
 	Value val;
 	if((val = searchList((ht->list[hv]), k)) != NULL)
 	{
