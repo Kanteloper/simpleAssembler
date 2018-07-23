@@ -82,9 +82,18 @@ int main(int argc, char** argv)
 			}
 		}
 	}
-
+	
+	fseek(fp, 0L, SEEK_SET); // reset file pointer 
+	lc = 0; // reset location counter
+	
 	// start second pass
-	//
+	while(fscanf(fp, "%s", str) != EOF)
+	{
+		puts(str);
+	}
+	// convert text section size to binary
+	// convert data section size to binary
+	// start to convert instructions to binary
 
 	fclose(fp);
 	regfree(&rg_lb);
