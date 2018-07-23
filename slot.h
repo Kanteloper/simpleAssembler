@@ -3,7 +3,7 @@
 
 typedef struct _slot
 {
-	int key;
+	int addr;
 	char* value;
 } Slot;
 

@@ -45,7 +45,7 @@ void HashInsert(HashTable* ht, Key k, Value v)
 
 	// init slot
 	Data newData;
-	newData.key = k;
+	newData.addr = k;
 	newData.value = (char*)malloc(sizeof(char) * (strlen(v) + 1));
 	strncpy(newData.value, v, strlen(v) + 1);
 	

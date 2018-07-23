@@ -89,7 +89,14 @@ int main(int argc, char** argv)
 	// start second pass
 	while(fscanf(fp, "%s", str) != EOF)
 	{
-		puts(str);
+		// begin search opTab
+		for(int i = 0; i < 19; i++)
+		{
+			if(HashSearch(opTab, opKey[i], str) != NULL)
+			{
+				puts(str);
+			}
+		}
 	}
 	// convert text section size to binary
 	// convert data section size to binary
