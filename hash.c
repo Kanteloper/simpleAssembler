@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 #include "hash.h"
 #include "linkedList.h"
@@ -41,11 +42,16 @@ HashTable* createTable(int size, HashFunc* f)
 void HashInsert(HashTable* ht, Key k, Value v)
 {
 	int hv = ht->hf(k); // get hash Value
-	Data newData = { k, v };
 
+	// init slot
+	Data newData;
+	newData.key = k;
+	newData.value = (char*)malloc(sizeof(char) * (strlen(v) + 1));
+	strncpy(newData.value, v, strlen(v) + 1);
+	
 	if(isDuplicated(ht, k, v))  //if duplicated
 	{
-		fprintf(stderr, "error: key duplication = %s, %d\n", v, k);
+		fprintf(stderr, "Duplicated data = %s, %d\n", v, k);
 		return;
 	}
 	else //if not 

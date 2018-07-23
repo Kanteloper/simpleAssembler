@@ -63,8 +63,7 @@ int main(int argc, char** argv)
 		if(!rt_lb) // if label
 		{
 			label = strtok(str, ":");
-			printf("label: %s, lc: %d\n", label, lc);
-			//HashInsert(symTab, lc, label); // store label
+			HashInsert(symTab, lc, label); // store label
 			lc++; // increate location counter
 		}
 		else // if not
@@ -74,7 +73,6 @@ int main(int argc, char** argv)
 				// search optable
 				if(HashSearch(opTab, opKey[i], str) != NULL) 
 				{ 
-					printf("op : %s, lc: %d\n", str, lc);
 					// if .word
 					if(strcmp(str, ".word") == 0)
 						lc += 3;
