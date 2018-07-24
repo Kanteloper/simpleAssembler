@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "linkedList.h"
 #include "hash.h"
-#define SYM_MAX 30
+#define LINE_MAX 30
 #define STR_MAX 15
 
 int symHashFunc(Key k);
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
 	// start first pass	
-	while(fgets(line, 30, fp) != NULL)
+	while(fgets(line, LINE_MAX, fp) != NULL) // read line by line
 	{
 		char* label;
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
@@ -81,21 +81,22 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	//fseek(fp, 0L, SEEK_SET); // reset file pointer 
-	//lc = 0; // reset location counter
+	fseek(fp, 0L, SEEK_SET); // reset file pointer 
+	lc = 0; // reset location counter
 
-	//// start second pass
-	//while(fscanf(fp, "%s", str) != EOF)
-	//{
-		//// begin search opTab
-		//for(int i = 0; i < 19; i++)
-		//{
-			//if(HashSearch(opTab, opKey[i], str) != NULL) // if operator found
-			//{
-				
-			//}
-		//}
-	//}
+	// start second pass
+	while(fgets(line, LINE_MAX, fp) != NULL) 
+	{
+		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
+		// begin search opTab
+		for(int i = 0; i < 19; i++)
+		{
+			if(HashSearch(opTab, opKey[i], arg1) != NULL) // if operator found
+			{
+				puts(arg1);
+			}
+		}
+	}
 	// convert text section size to binary
 	// convert data section size to binary
 	// start to convert instructions to binary
