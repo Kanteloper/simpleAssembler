@@ -21,11 +21,11 @@ void setOpTab(HashTable* ot);
 int main(int argc, char** argv)
 {
 	FILE *fp;
-	char str[STR_MAX];
-	// key for opTab
-	int opKey[19] = { 0x01, 0x09, 0x03, 0x0d, 0x21, 0x08, 0x0b, 0x24, 0x0f, 
-		0x2b, 0x0c, 0x23, 0x00, 0x04, 0x02, 0x05, 0x27, 0x25, 0x1c};
-	char regmsg[100];
+	char line[STR_MAX], arg1[STR_MAX], arg2[STR_MAX], arg3[STR_MAX], arg4[STR_MAX]; 
+	int opKey[19] = { 0x01, 0x09, 0x03, 0x0d,
+					  0x21, 0x08, 0x0b, 0x24, 0x0f, 
+					  0x2b, 0x0c, 0x23, 0x00, 0x04, 
+					  0x02, 0x05, 0x27, 0x25, 0x1c }; // key for opTab
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
@@ -47,57 +47,55 @@ int main(int argc, char** argv)
 	}
 
 	// compile regular expression
-	rt_lb = regcomp(&rg_lb, "[:]", 0); 
+	rt_lb = regcomp(&rg_lb, "[:.]", 0); 
 
-	// create predefined operator table
+	// set predefined operator table
 	opTab = createTable(TB_MAX, opHashFunc);
 	setOpTab(opTab);
 
 	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
-	// start first pass
-	while(fscanf(fp, "%s", str) != EOF) 
-	{ 
-		char* label;
-		rt_lb = regexec(&rg_lb, str, 0, NULL, 0); // execute regex
-		if(!rt_lb) // if label
-		{
-			label = strtok(str, ":");
-			HashInsert(symTab, lc, label); // store label
-			lc++; // increate location counter
-		}
-		else // if not
-		{
-			for(int i = 0; i < 19; i++)
-			{
-				// search optable
-				if(HashSearch(opTab, opKey[i], str) != NULL) 
-				{ 
-					// if .word
-					if(strcmp(str, ".word") == 0)
-						lc += 3;
-					else // other operators
-						lc += 4;
-				}
-			}
-		}
-	}
-	
-	fseek(fp, 0L, SEEK_SET); // reset file pointer 
-	lc = 0; // reset location counter
-	
-	// start second pass
-	while(fscanf(fp, "%s", str) != EOF)
+	// start first pass	
+	while(fgets(line, 30, fp) != NULL)
 	{
-		// begin search opTab
-		for(int i = 0; i < 19; i++)
+		char* label;
+		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
+		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
+		if(!rt_lb) 
 		{
-			if(HashSearch(opTab, opKey[i], str) != NULL)
+			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0) // if arg1 label
 			{
-				puts(str);
+				label = strtok(arg1, ":");
+				HashInsert(symTab, lc, label); // store label
+			}
+			if(strcmp(arg2, ".word") == 0) // if arg2 .word
+			{
+				lc += 4;
 			}
 		}
+		else if(strcmp(arg1, ".word") == 0) // if arg1 .word
+			lc += 4;
+		else // if operator
+			lc += 4;
+
+		arg2[0] = '\0'; // flush arg2  
 	}
+
+	//fseek(fp, 0L, SEEK_SET); // reset file pointer 
+	//lc = 0; // reset location counter
+
+	//// start second pass
+	//while(fscanf(fp, "%s", str) != EOF)
+	//{
+		//// begin search opTab
+		//for(int i = 0; i < 19; i++)
+		//{
+			//if(HashSearch(opTab, opKey[i], str) != NULL) // if operator found
+			//{
+				
+			//}
+		//}
+	//}
 	// convert text section size to binary
 	// convert data section size to binary
 	// start to convert instructions to binary
