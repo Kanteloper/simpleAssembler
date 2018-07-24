@@ -29,6 +29,7 @@ int main(int argc, char** argv)
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
+	int txt_cnt = 0; int data_cnt = 0; // number of text and data
 	HashTable* opTab; // operator table
 	HashTable* symTab; // symbol table 
 
@@ -71,12 +72,19 @@ int main(int argc, char** argv)
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
 			{
 				lc += 4;
+				data_cnt++;
 			}
 		}
 		else if(strcmp(arg1, ".word") == 0) // if arg1 .word
+		{
 			lc += 4;
+			data_cnt++;
+		}
 		else // if operator
+		{
 			lc += 4;
+			txt_cnt++;
+		}
 
 		arg2[0] = '\0'; // flush arg2  
 	}
@@ -93,7 +101,7 @@ int main(int argc, char** argv)
 		{
 			if(HashSearch(opTab, opKey[i], arg1) != NULL) // if operator found
 			{
-				puts(arg1);
+				//puts(arg1);
 			}
 		}
 	}
