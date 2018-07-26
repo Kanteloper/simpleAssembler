@@ -16,21 +16,24 @@
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-void setOpTab(HashTable* ot);
+void set_rOpTab(HashTable* ot);
+void set_iOpTab(HashTable* ot);
+void set_jOpTab(HashTable* ot);
 
 int main(int argc, char** argv)
 {
 	FILE *fp;
 	char line[STR_MAX], arg1[STR_MAX], arg2[STR_MAX], arg3[STR_MAX], arg4[STR_MAX]; 
-	int opKey[19] = { 0x01, 0x09, 0x03, 0x0d,
-					  0x21, 0x08, 0x0b, 0x24, 0x0f, 
-					  0x2b, 0x0c, 0x23, 0x00, 0x04, 
-					  0x02, 0x05, 0x27, 0x25, 0x1c }; // key for opTab
+	int r_key[9] = { 0x21, 0x08, 0x24, 0x2b, 0x00, 0x02, 0x27, 0x25, 0x23 };
+	int i_key[8] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b };
+	int j_key[2] = { 0x03, 0x02 };
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
 	int txt_cnt = 0; int data_cnt = 0; // number of text and data
-	HashTable* opTab; // operator table
+	HashTable* rOpTab; // operator table for R format instruction
+	HashTable* iOpTab; // operator table for I format instruction
+	HashTable* jOpTab; // operator table for J format instruction
 	HashTable* symTab; // symbol table 
 
 	// check parameter
@@ -51,8 +54,9 @@ int main(int argc, char** argv)
 	rt_lb = regcomp(&rg_lb, "[:.]", 0); 
 
 	// set predefined operator table
-	opTab = createTable(TB_MAX, opHashFunc);
-	setOpTab(opTab);
+	rOpTab = createTable(TB_MAX, opHashFunc); set_rOpTab(rOpTab);
+	iOpTab = createTable(TB_MAX, opHashFunc); set_iOpTab(iOpTab);
+	jOpTab = createTable(TB_MAX, opHashFunc); set_jOpTab(jOpTab);
 
 	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
@@ -96,25 +100,39 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		// begin search opTab
-		for(int i = 0; i < 19; i++)
+		for(int i = 0; i < 9; i++)
 		{
-			if(HashSearch(opTab, opKey[i], arg1) != NULL) // if operator found
+			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
 			{
-				//puts(arg1);
+				printf("r type: %s\n", arg1);
+				break;
+			}
+			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
+			{
+				printf("i type: %s\n", arg1);
+				break;
+			}
+			else if(HashSearch(jOpTab, j_key[i], arg1) != NULL)// if J format instruction
+			{
+				printf("j type: %s\n", arg1);
+				break;
 			}
 		}
+		// else if I format instruction
+		// else J format instruction
 	}
 	// convert text section size to binary
 	// convert data section size to binary
 	// start to convert instructions to binary
+	// check that there is a symbol in label field
+	// store symbol in symbol table
 
 	fclose(fp);
 	regfree(&rg_lb);
-	free(opTab);
+	free(rOpTab);
+	free(iOpTab);
+	free(jOpTab);
 	free(symTab);
-	// check that there is a symbol in label field
-	// store symbol in symbol table
 	return 0;
 }
 
@@ -139,32 +157,47 @@ int opHashFunc(Key k)
 }
 
 /**
- * @brief predefined operation table
+ * @brief predefined R format operation table
  * @param HashTable* ot
  */
-void setOpTab(HashTable* ot)
+void set_rOpTab(HashTable* ot)
 {
-	// total 22 operators
-	HashInsert(ot, 0x01, ".word");
-	HashInsert(ot, 0x09, "addiu");
-	HashInsert(ot, 0x03, "jal");
-	HashInsert(ot, 0x0d, "ori");
+	// total 9 operators
 	HashInsert(ot, 0x21, "addu");
 	HashInsert(ot, 0x08, "jr");
-	HashInsert(ot, 0x0b, "sltiu");
 	HashInsert(ot, 0x24, "and");
-	HashInsert(ot, 0x0f, "lui");
 	HashInsert(ot, 0x2b, "sltu");
-	HashInsert(ot, 0x0c, "andi");
-	HashInsert(ot, 0x23, "lw");
 	HashInsert(ot, 0x00, "sll");
-	HashInsert(ot, 0x04, "beq");
 	HashInsert(ot, 0x02, "srl");
-	HashInsert(ot, 0x05, "bne");
 	HashInsert(ot, 0x27, "nor");
-	HashInsert(ot, 0x2b, "sw");
-	HashInsert(ot, 0x02, "j");
 	HashInsert(ot, 0x25, "or");
 	HashInsert(ot, 0x23, "subu");
+}
+
+/**
+ * @brief predefined I format operation table
+ * @param HashTable* ot
+ */
+void set_iOpTab(HashTable* ot)
+{
+	// total 8 operators
+	HashInsert(ot, 0x09, "addiu");
+	HashInsert(ot, 0x0b, "sltiu");
+	HashInsert(ot, 0x0c, "andi");
+	HashInsert(ot, 0x23, "lw");
+	HashInsert(ot, 0x04, "beq");
+	HashInsert(ot, 0x05, "bne");
+	HashInsert(ot, 0x2b, "sw");
 	HashInsert(ot, 0x1c, "la");
+}
+
+/**
+ * @brief predefined J format operation table
+ * @param HashTable* ot
+ */
+void set_jOpTab(HashTable* ot)
+{
+	// total 2 operators
+	HashInsert(ot, 0x03, "jal");
+	HashInsert(ot, 0x02, "j");
 }
