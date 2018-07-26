@@ -1,21 +1,26 @@
 /*
  * Date : 2018-07-04
  * Name : Kanteloper
- * Detail : implement first pass of assembler
+ * Brief : implement simple assembler
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
+
 #include "linkedList.h"
 #include "hash.h"
+
 #define LINE_MAX 30
 #define STR_MAX 15
+#define BUF_MAX 500
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
+char* toBinary(char** rg, char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
@@ -23,7 +28,9 @@ void set_jOpTab(HashTable* ot);
 int main(int argc, char** argv)
 {
 	FILE *fp;
-	char line[STR_MAX], arg1[STR_MAX], arg2[STR_MAX], arg3[STR_MAX], arg4[STR_MAX]; 
+	char line[STR_MAX];
+	char arg1[STR_MAX] = {0}; char arg2[STR_MAX] = {0};
+	char arg3[STR_MAX] = {0}; char arg4[STR_MAX] = {0};
 	int r_key[9] = { 0x21, 0x08, 0x24, 0x2b, 0x00, 0x02, 0x27, 0x25, 0x23 };
 	int i_key[8] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b };
 	int j_key[2] = { 0x03, 0x02 };
@@ -34,7 +41,14 @@ int main(int argc, char** argv)
 	HashTable* rOpTab; // operator table for R format instruction
 	HashTable* iOpTab; // operator table for I format instruction
 	HashTable* jOpTab; // operator table for J format instruction
-	HashTable* symTab; // symbol table 
+	HashTable* symTab; // symbol table
+	char *rgst[] = { "00000", "00001", "00010", "00011", "00100", "00101",
+						 "00110", "00111", "01000", "01001", "01010", "01011",
+						 "01100", "01101", "01110", "01111", "10000", "10001",
+						 "10010", "10011", "10100", "10101", "10110", "10111",
+						 "11000", "11001", "11010", "11011", "11100", "11101",
+						 "11110", "11111" }; // register 
+	//char buffer[]; // buffer for file output
 
 	// check parameter
 	if(argc < 2) 
@@ -102,24 +116,62 @@ int main(int argc, char** argv)
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
 		{
+			// opcode 6bits set 0
 			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
 			{
-				printf("r type: %s\n", arg1);
-				break;
+				char opcode[6] = "000000";
+				char* tmp;
+				int index = 0;
+				if(strcmp(arg1, "addu") == 0) // addu
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "jr") == 0) // jr
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "and") == 0) // and
+				{
+					// extract arg2, arg3, arg4 
+					puts(toBinary(rgst, arg2));
+				}
+				if(strcmp(arg1, "sltu") == 0) // sltu
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "sll") == 0) // sll
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "srl") == 0) // srl
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "nor") == 0) // nor
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "or") == 0) // or
+				{
+					puts(arg2);				
+				}
+				if(strcmp(arg1, "subu") == 0) // subu
+				{
+					puts(arg2);				
+				}
 			}
-			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
-			{
-				printf("i type: %s\n", arg1);
-				break;
-			}
-			else if(HashSearch(jOpTab, j_key[i], arg1) != NULL)// if J format instruction
-			{
-				printf("j type: %s\n", arg1);
-				break;
-			}
+			//else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
+			//{
+			//break;
+			//}
+			//else if(HashSearch(jOpTab, j_key[i], arg1) != NULL)// if J format instruction
+			//{
+			//break;
+			//}
 		}
 		// else if I format instruction
-		// else J format instruction
+		// else J format instructions
+		arg2[0] = '\0'; // flush arg2  
 	}
 	// convert text section size to binary
 	// convert data section size to binary
@@ -136,6 +188,22 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+/** 
+ * @brief convert register number to binary
+ * @param char** $rg_array for binary value of register
+ * @param char* &arg
+ * @return char*
+ */
+char* toBinary(char** rg, char* arg)
+{
+	int i = 0;
+	char* tmp = (char*)malloc(sizeof(char) * 5);
+	strcpy(tmp, arg);
+	tmp = strtok(tmp, "$");
+	tmp = strtok(tmp, ",");
+	i = atoi(tmp);
+	return rg[i];
+}
 /**
  * @brief hash function for symbol table 
  * @param int $k location counter 
