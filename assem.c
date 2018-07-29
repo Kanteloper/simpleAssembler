@@ -18,6 +18,16 @@
 #define STR_MAX 15
 #define BUF_MAX 500
 
+typedef struct _r_struct
+{
+	char op[6];
+	char rs[5];
+	char rt[5];
+	char rd[5];
+	char shamt[5];
+	char funct[6];
+} format_R;
+
 int symHashFunc(Key k);
 int opHashFunc(Key k);
 char* toBinary(char** rg, char* arg);
@@ -47,7 +57,7 @@ int main(int argc, char** argv)
 						 "01100", "01101", "01110", "01111", "10000", "10001",
 						 "10010", "10011", "10100", "10101", "10110", "10111",
 						 "11000", "11001", "11010", "11011", "11100", "11101",
-						 "11110", "11111" }; // register 
+						 "11110", "11111" }; // binary code for register $0 ~ $31
 	//char buffer[]; // buffer for file output
 
 	// check parameter
@@ -113,51 +123,57 @@ int main(int argc, char** argv)
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
+		char binary[32]; // for binary code
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
+
 		for(int i = 0; i < 9; i++)
 		{
-			// opcode 6bits set 0
 			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
 			{
-				char opcode[6] = "000000";
 				char* tmp;
 				int index = 0;
+
 				if(strcmp(arg1, "addu") == 0) // addu
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "jr") == 0) // jr
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "and") == 0) // and
 				{
+					// opcode 6bits set 0
+
+
 					// extract arg2, arg3, arg4 
 					puts(toBinary(rgst, arg2));
+					// concatenate all string
+					// save binary string to buffer
 				}
 				if(strcmp(arg1, "sltu") == 0) // sltu
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "sll") == 0) // sll
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "srl") == 0) // srl
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "nor") == 0) // nor
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "or") == 0) // or
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 				if(strcmp(arg1, "subu") == 0) // subu
 				{
-					puts(arg2);				
+					//puts(arg2);				
 				}
 			}
 			//else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
