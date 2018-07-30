@@ -161,6 +161,7 @@ int main(int argc, char** argv)
 				{
 					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 							toBinary(rgst, arg2), "00000", "100100");
+					puts(binary);
 					// concatenate all string
 					// save binary string to buffer
 				}
@@ -244,16 +245,6 @@ void makeRformBinary(char* dest, char* op, char* rs, char* rt,
 	strncat(dest, fr.shamt, (strlen(dest) + strlen(fr.shamt) + 1));
 	strncpy(fr.funct, func, 7);
 	strncat(dest, fr.funct, (strlen(dest) + strlen(fr.funct) + 1));
-
-	puts(dest);
-
-
-
-
-
-
-	
-
 }
 
 /** 
