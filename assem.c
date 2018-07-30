@@ -20,26 +20,26 @@
 
 typedef struct _r_struct
 {
-	char op[6];
-	char rs[5];
-	char rt[5];
-	char rd[5];
-	char shamt[5];
-	char funct[6];
+	char op[7];
+	char rs[6];
+	char rt[6];
+	char rd[6];
+	char shamt[6];
+	char funct[7];
 } format_R;
 
 typedef struct _i_struct
 {
-	char op[6];
-	char rs[5];
-	char rt[5];
-	char immd[16];
+	char op[7];
+	char rs[6];
+	char rt[6];
+	char immd[17];
 } format_I;
 
 typedef struct _j_struct
 {
-	char op[6];
-	char addr[26];
+	char op[7];
+	char addr[27];
 } format_J;
 
 int symHashFunc(Key k);
@@ -48,6 +48,8 @@ char* toBinary(char** rg, char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
+void makeRformBinary(char* dest, char* op, char* rs, char* rt,
+									char* rd, char* shamt, char* func);
 
 int main(int argc, char** argv)
 {
@@ -138,9 +140,6 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		char binary[32]; // for binary code
-		format_R fr; // structure for format R instruction
-		format_I fi; // structure for format I instruction
-		format_J fj; // structure for format J instruction
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
@@ -160,16 +159,8 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, "and") == 0) // and
 				{
-					strncpy(fr.op, "000000", 6); // opcode 
-					strncpy(fr.rs, toBinary(arg2), 5); // rs
-					strncpy(fr.rt, toBinary(arg3), 5); // rt
-					strncpy(fr.rd, toBinary(arg4), 5); // rd
-
-
-					
-
-
-					// extract arg2, arg3, arg4 
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "100100");
 					// concatenate all string
 					// save binary string to buffer
 				}
@@ -224,6 +215,45 @@ int main(int argc, char** argv)
 	free(jOpTab);
 	free(symTab);
 	return 0;
+}
+
+/**
+ * @brief make R instruction format binary code and 
+ * @param char* $dest
+ * @param char* $op 
+ * @param char* $rs
+ * @param char* $rt
+ * @param char* $rd
+ * @param char* $shamt
+ * @param char* $func 
+ */
+void makeRformBinary(char* dest, char* op, char* rs, char* rt, 
+		char* rd, char* shamt, char* func)
+{
+	format_R fr; // structure for format R instruction
+
+	strncpy(fr.op, op, 7);
+	strncpy(dest, fr.op, 7);
+	strncpy(fr.rs, rs, 6);
+	strncat(dest, fr.rs, (strlen(dest) + strlen(fr.rs) + 1));
+	strncpy(fr.rt, rt, 6);
+	strncat(dest, fr.rt, (strlen(dest) + strlen(fr.rt) + 1));
+	strncpy(fr.rd, rd, 6);
+	strncat(dest, fr.rd, (strlen(dest) + strlen(fr.rd) + 1));
+	strncpy(fr.shamt, shamt, 6);
+	strncat(dest, fr.shamt, (strlen(dest) + strlen(fr.shamt) + 1));
+	strncpy(fr.funct, func, 7);
+	strncat(dest, fr.funct, (strlen(dest) + strlen(fr.funct) + 1));
+
+	puts(dest);
+
+
+
+
+
+
+	
+
 }
 
 /** 
