@@ -16,7 +16,7 @@
 
 #define LINE_MAX 30
 #define STR_MAX 15
-#define BUF_MAX 500
+#define BUF_MAX 1000
 
 typedef struct _r_struct
 {
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 						 "10010", "10011", "10100", "10101", "10110", "10111",
 						 "11000", "11001", "11010", "11011", "11100", "11101",
 						 "11110", "11111" }; // binary code for register $0 ~ $31
-	//char buffer[]; // buffer for file output
+	char buffer[BUF_MAX]; // buffer for file output
 
 	// check parameter
 	if(argc < 2) 
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
-		char binary[32]; // for binary code
+		char binary[32]; // for test 
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
@@ -159,11 +159,10 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, "and") == 0) // and
 				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100100");
-					puts(binary);
-					// concatenate all string
-					// save binary string to buffer
+					//makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							//toBinary(rgst, arg2), "00000", "100100");
+					makeRformBinary(buffer, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "100100"); // make binary code and save to buffer
 				}
 				else if(strcmp(arg1, "sltu") == 0) // sltu
 				{
