@@ -28,6 +28,20 @@ typedef struct _r_struct
 	char funct[6];
 } format_R;
 
+typedef struct _i_struct
+{
+	char op[6];
+	char rs[5];
+	char rt[5];
+	char immd[16];
+} format_I;
+
+typedef struct _j_struct
+{
+	char op[6];
+	char addr[26];
+} format_J;
+
 int symHashFunc(Key k);
 int opHashFunc(Key k);
 char* toBinary(char** rg, char* arg);
@@ -124,8 +138,11 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		char binary[32]; // for binary code
-		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
+		format_R fr; // structure for format R instruction
+		format_I fi; // structure for format I instruction
+		format_J fj; // structure for format J instruction
 
+		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
 		{
 			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
@@ -137,21 +154,26 @@ int main(int argc, char** argv)
 				{
 					//puts(arg2);				
 				}
-				if(strcmp(arg1, "jr") == 0) // jr
+				else if(strcmp(arg1, "jr") == 0) // jr
 				{
 					//puts(arg2);				
 				}
-				if(strcmp(arg1, "and") == 0) // and
+				else if(strcmp(arg1, "and") == 0) // and
 				{
-					// opcode 6bits set 0
+					strncpy(fr.op, "000000", 6); // opcode 
+					strncpy(fr.rs, toBinary(arg2), 5); // rs
+					strncpy(fr.rt, toBinary(arg3), 5); // rt
+					strncpy(fr.rd, toBinary(arg4), 5); // rd
+
+
+					
 
 
 					// extract arg2, arg3, arg4 
-					puts(toBinary(rgst, arg2));
 					// concatenate all string
 					// save binary string to buffer
 				}
-				if(strcmp(arg1, "sltu") == 0) // sltu
+				else if(strcmp(arg1, "sltu") == 0) // sltu
 				{
 					//puts(arg2);				
 				}
