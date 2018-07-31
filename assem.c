@@ -182,7 +182,9 @@ int main(int argc, char** argv)
 				}
 				if(strcmp(arg1, "or") == 0) // or
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "100101");
+					puts(binary);
 				}
 				if(strcmp(arg1, "subu") == 0) // subu
 				{
