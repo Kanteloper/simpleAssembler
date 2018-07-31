@@ -15,7 +15,7 @@
 #include "hash.h"
 
 #define LINE_MAX 30
-#define STR_MAX 15
+#define STR_MAX 20
 #define BUF_MAX 1000 
 
 typedef struct _r_struct
@@ -149,7 +149,10 @@ int main(int argc, char** argv)
 			{
 				if(strcmp(arg1, "addu") == 0) // addu
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "100001");  
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					break;
 				}
 				else if(strcmp(arg1, "jr") == 0) // jr
 				{
