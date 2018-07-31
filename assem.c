@@ -140,16 +140,13 @@ int main(int argc, char** argv)
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
-		char binary[33]; // for test 
+		char binary[33]; 
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
 		{
 			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
 			{
-				char* tmp;
-				int index = 0;
-
 				if(strcmp(arg1, "addu") == 0) // addu
 				{
 					//puts(arg2);				
@@ -161,8 +158,8 @@ int main(int argc, char** argv)
 				else if(strcmp(arg1, "and") == 0) // and
 				{
 					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100100"); // make binary code and save to buffer
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+							toBinary(rgst, arg2), "00000", "100100");  
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 					break;
 				}
 				else if(strcmp(arg1, "sltu") == 0) // sltu
@@ -171,11 +168,18 @@ int main(int argc, char** argv)
 				}
 				if(strcmp(arg1, "sll") == 0) // sll
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
+							toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
+					puts(binary);
+					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					break;
 				}
 				if(strcmp(arg1, "srl") == 0) // srl
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "000010");  
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					break;
 				}
 				if(strcmp(arg1, "nor") == 0) // nor
 				{
@@ -185,8 +189,8 @@ int main(int argc, char** argv)
 				{
 					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 							toBinary(rgst, arg2), "00000", "100101");
-					//puts(binary);
-					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					break;
 				}
 				if(strcmp(arg1, "subu") == 0) // subu
 				{
@@ -207,7 +211,7 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	puts(buffer);
+	//puts(buffer);
 
 	// convert text section size to binary
 	// convert data section size to binary
