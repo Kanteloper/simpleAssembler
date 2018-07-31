@@ -16,7 +16,7 @@
 
 #define LINE_MAX 30
 #define STR_MAX 15
-#define BUF_MAX 1000
+#define BUF_MAX 1000 
 
 typedef struct _r_struct
 {
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 						 "10010", "10011", "10100", "10101", "10110", "10111",
 						 "11000", "11001", "11010", "11011", "11100", "11101",
 						 "11110", "11111" }; // binary code for register $0 ~ $31
-	char buffer[BUF_MAX]; // buffer for file output
+	char buffer[BUF_MAX] = {}; // buffer for file output
 
 	// check parameter
 	if(argc < 2) 
@@ -136,10 +136,11 @@ int main(int argc, char** argv)
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
 
+
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
-		char binary[32]; // for test 
+		char binary[33]; // for test 
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		for(int i = 0; i < 9; i++)
@@ -159,10 +160,10 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, "and") == 0) // and
 				{
-					//makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							//toBinary(rgst, arg2), "00000", "100100");
-					makeRformBinary(buffer, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 							toBinary(rgst, arg2), "00000", "100100"); // make binary code and save to buffer
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					break;
 				}
 				else if(strcmp(arg1, "sltu") == 0) // sltu
 				{
@@ -184,7 +185,8 @@ int main(int argc, char** argv)
 				{
 					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 							toBinary(rgst, arg2), "00000", "100101");
-					puts(binary);
+					//puts(binary);
+					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 				}
 				if(strcmp(arg1, "subu") == 0) // subu
 				{
@@ -204,6 +206,9 @@ int main(int argc, char** argv)
 		// else J format instructions
 		arg2[0] = '\0'; // flush arg2  
 	}
+
+	puts(buffer);
+
 	// convert text section size to binary
 	// convert data section size to binary
 	// start to convert instructions to binary
@@ -220,7 +225,7 @@ int main(int argc, char** argv)
 }
 
 /**
- * @brief make R instruction format binary code and 
+ * @brief make R instruction format binary code 
  * @param char* $dest
  * @param char* $op 
  * @param char* $rs
