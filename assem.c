@@ -170,14 +170,13 @@ int main(int argc, char** argv)
 				{
 					makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
 							toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
-					puts(binary);
-					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 					break;
 				}
 				if(strcmp(arg1, "srl") == 0) // srl
 				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "000010");  
+					makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
+							toBinary(rgst, arg2), toBinary(rgst, arg4), "000010");  
 					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 					break;
 				}
@@ -211,7 +210,7 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	//puts(buffer);
+	puts(buffer);
 
 	// convert text section size to binary
 	// convert data section size to binary
