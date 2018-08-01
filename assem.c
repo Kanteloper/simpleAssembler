@@ -156,7 +156,10 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, "jr") == 0) // jr
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
+							"00000", "001000");
+					puts(binary);
+					break;
 				}
 				else if(strcmp(arg1, "and") == 0) // and
 				{
@@ -216,7 +219,7 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	puts(buffer);
+	//puts(buffer);
 
 	// convert text section size to binary
 	// convert data section size to binary
