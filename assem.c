@@ -10,7 +10,6 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
-
 #include "linkedList.h"
 #include "hash.h"
 
@@ -55,8 +54,10 @@ int main(int argc, char** argv)
 {
 	FILE *fp;
 	char line[STR_MAX];
-	char arg1[STR_MAX] = {0}; char arg2[STR_MAX] = {0};
-	char arg3[STR_MAX] = {0}; char arg4[STR_MAX] = {0};
+	char arg1[STR_MAX] = {};
+	char arg2[STR_MAX] = {};
+	char arg3[STR_MAX] = {}; 
+	char arg4[STR_MAX] = {};
 	int r_key[9] = { 0x21, 0x08, 0x24, 0x2b, 0x00, 0x02, 0x27, 0x25, 0x23 };
 	int i_key[8] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b };
 	int j_key[2] = { 0x03, 0x02 };
@@ -147,75 +148,77 @@ int main(int argc, char** argv)
 		{
 			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
 			{
-				if(strcmp(arg1, "addu") == 0) // addu
+				switch(r_key[i])
 				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100001");  
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					break;
-				}
-				else if(strcmp(arg1, "jr") == 0) // jr
-				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
-							"00000", "001000");
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					break;
-				}
-				else if(strcmp(arg1, "and") == 0) // and
-				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100100");  
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					break;
-				}
-				else if(strcmp(arg1, "sltu") == 0) // sltu
-				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "101011");  
-					puts(binary);
-					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					break;
-				}
-				if(strcmp(arg1, "sll") == 0) // sll
-				{
-					makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
-							toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-					break;
-				}
-				if(strcmp(arg1, "srl") == 0) // srl
-				{
-					makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
-							toBinary(rgst, arg2), toBinary(rgst, arg4), "000010");  
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-					break;
-				}
-				if(strcmp(arg1, "nor") == 0) // nor
-				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100111");
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-					break;
-				}
-				if(strcmp(arg1, "or") == 0) // or
-				{
-					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-							toBinary(rgst, arg2), "00000", "100101");
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-					break;
-				}
-				if(strcmp(arg1, "subu") == 0) // subu
-				{
-					//puts(arg2);				
+					case 0: // sll
+						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
+								toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						break;
+
+					case 2: // srl
+						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
+								toBinary(rgst, arg2), toBinary(rgst, arg4), "000010");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						break;
+
+					case 8: // jr
+						makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
+								"00000", "001000");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						break;
+
+					case 33: // addu
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "100001");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						break;
+
+					case 35: // subu
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "100011");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						break;
+
+					case 36: // and
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "100100");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						break;
+
+					case 37: // or
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "100101");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						break;
+
+					case 39: // nor
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "100111");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						break;
+
+					case 43: // sltu
+						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+								toBinary(rgst, arg2), "00000", "101011");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						break;
+
+					default:
+						break;
 				}
 			}
-			//else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
-			//{
-			//break;
-			//}
+			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
+			{
+				switch(i_key[i])
+				{
+					case 4: // beq
+						break;
+				}
+			}
 			//else if(HashSearch(jOpTab, j_key[i], arg1) != NULL)// if J format instruction
 			//{
-			//break;
+				//break;
 			//}
 		}
 		// else if I format instruction
@@ -223,7 +226,7 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	//puts(buffer);
+	puts(buffer);
 
 	// convert text section size to binary
 	// convert data section size to binary
