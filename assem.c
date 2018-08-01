@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 				{
 					makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
 							"00000", "001000");
-					puts(binary);
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 					break;
 				}
 				else if(strcmp(arg1, "and") == 0) // and
@@ -170,7 +170,11 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, "sltu") == 0) // sltu
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "101011");  
+					puts(binary);
+					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					break;
 				}
 				if(strcmp(arg1, "sll") == 0) // sll
 				{
