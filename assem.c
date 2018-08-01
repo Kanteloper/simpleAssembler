@@ -185,7 +185,10 @@ int main(int argc, char** argv)
 				}
 				if(strcmp(arg1, "nor") == 0) // nor
 				{
-					//puts(arg2);				
+					makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
+							toBinary(rgst, arg2), "00000", "100111");
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+					break;
 				}
 				if(strcmp(arg1, "or") == 0) // or
 				{
