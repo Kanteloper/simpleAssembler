@@ -156,68 +156,85 @@ int main(int argc, char** argv)
 						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
 								toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
 						break;
 
 					case 2: // srl
 						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
 								toBinary(rgst, arg2), toBinary(rgst, arg4), "000010");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
 						break;
 
 					case 8: // jr
 						makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
 								"00000", "001000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
 						break;
 
 					case 33: // addu
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "100001");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
 						break;
 
 					case 35: // subu
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "100011");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
 						break;
 
 					case 36: // and
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "100100");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
 						break;
 
 					case 37: // or
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "100101");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
 						break;
 
 					case 39: // nor
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "100111");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
 						break;
 
 					case 43: // sltu
 						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
 								toBinary(rgst, arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
 						break;
 				}
 			}
 			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
 			{
+				int b_target;
 				switch(i_key[i])
 				{
 					case 4: // beq
 						// search symbol as operand
 						for(int i = 0; i <= total_key; i++)
 						{
-							if(HashSearch(symTab, i, arg4) != NULL) // if found
+							if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
 							{
-			
+								makeIformBinary(binary, "000100", toBinary(rgst, arg2),
+										toBinary(rgst, arg3), );
+								break;
+							}
+							else
+							{
+								// set operand address as 0
+								// error flag
 							}
 						}
 						break;
