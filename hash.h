@@ -19,5 +19,6 @@ HashTable* createTable(int size, HashFunc* f);
 void HashInsert(HashTable* ht, Key k, Value v);
 Value HashSearch(HashTable* ht, Key k, Value v);
 bool isDuplicated(HashTable* ht, Key k, Value v);
+int getHashAddr(HashTable* ht, int hk, char* oprn);
 
 #endif

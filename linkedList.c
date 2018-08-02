@@ -25,7 +25,7 @@ List* initList()
  * @brief search data with key in linked list
  * @param List* $pl
  * @param Value $v
- * @return Value
+ * @return Data
  */
 Value searchList(List* pl, Value v)
 {
@@ -36,6 +36,23 @@ Value searchList(List* pl, Value v)
 		sp = sp->next;
 	}
 	return NULL;
+}
+
+/**
+ * @brief search operand address 
+ * @param List* $pl
+ * @param char* $oprn
+ * @return int
+ */
+int getAddr(List* pl, char* oprn)
+{
+	Node* sp = pl->head;
+	while(sp) 
+	{
+		if(strcmp(sp->data.value, oprn) == 0) return sp->data.addr;
+		sp = sp->next;
+	}
+	return -1;
 }
 
 /**

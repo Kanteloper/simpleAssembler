@@ -22,5 +22,6 @@ typedef LinkedList List;
 List* initList();
 Value searchList(List* pl, Value v);
 void insertList(List* pl, Data nd);
+int getAddr(List* pl, char* oprn);
 
 #endif

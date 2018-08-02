@@ -96,3 +96,20 @@ bool isDuplicated(HashTable* ht, Key k, Value v)
 	}
 	return false;
 }
+
+/**
+ * @brief get an address of Value
+ * @param HashTable* $ht 
+ * @param int $hk total_key 
+ * @param char* $oprn operand
+ * @return int
+ */
+int getHashAddr(HashTable* ht, int hk, char* oprn)
+{
+	int addr;
+	if((addr = getAddr(ht->list[hk], oprn)) != -1)
+	{
+		return addr;
+	}
+	return -1;
+}

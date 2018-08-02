@@ -64,6 +64,7 @@ int main(int argc, char** argv)
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
+	int total_key = 0; // total number of key
 	int txt_cnt = 0; int data_cnt = 0; // number of text and data
 	HashTable* rOpTab; // operator table for R format instruction
 	HashTable* iOpTab; // operator table for I format instruction
@@ -134,9 +135,10 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
+
+	total_key = lc / 4; // save total number of location counter
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
-
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
@@ -203,9 +205,6 @@ int main(int argc, char** argv)
 								toBinary(rgst, arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						break;
-
-					default:
-						break;
 				}
 			}
 			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
@@ -213,6 +212,28 @@ int main(int argc, char** argv)
 				switch(i_key[i])
 				{
 					case 4: // beq
+						// search symbol as operand
+						for(int i = 0; i <= total_key; i++)
+						{
+							if(HashSearch(symTab, i, arg4) != NULL) // if found
+							{
+			
+							}
+						}
+						break;
+					case 5: // bne
+						break;
+					case 9: // addiu
+						break;
+					case 11: // sltiu
+						break;
+					case 12: // andi
+						break;
+					case 28: // la
+						break;
+					case 35: // lw
+						break;
+					case 43: // sw
 						break;
 				}
 			}
@@ -270,6 +291,26 @@ void makeRformBinary(char* dest, char* op, char* rs, char* rt,
 	strncat(dest, fr.shamt, (strlen(dest) + strlen(fr.shamt) + 1));
 	strncpy(fr.funct, func, 7);
 	strncat(dest, fr.funct, (strlen(dest) + strlen(fr.funct) + 1));
+}
+
+/**
+ * @brief make I instruction format binary code
+ * @param char* $dest
+ * @param char* $op 
+ * @param char* $rs
+ * @param char* $rt
+ * @param char* $imme
+ */
+void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd)
+{
+	format_I fi; // structure for format I instruction
+
+	strncpy(fi.op, op, 7);
+	strncpy(fi.rs, rs, 6);
+	strncpy(fi.rt, rt, 6);
+	strncpy(fi.immd, immd, 17);
+
+	
 }
 
 /** 
