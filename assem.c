@@ -49,8 +49,8 @@ void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
 char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
-void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd);
-void OffsetToBin(char* offset, int arg);
+char* makeIformBinary(char* op, char* rs, char* rt, char* immd);
+char* OffsetToBin(int arg);
 int isRformat(HashTable* ht, int* rk, char* arg);
 int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
@@ -75,12 +75,6 @@ int main(int argc, char** argv)
 	HashTable* iOpTab; // operator table for I format instruction
 	HashTable* jOpTab; // operator table for J format instruction
 	HashTable* symTab; // symbol table
-	char *rgst[] = { "00000", "00001", "00010", "00011", "00100", "00101",
-		"00110", "00111", "01000", "01001", "01010", "01011",
-		"01100", "01101", "01110", "01111", "10000", "10001",
-		"10010", "10011", "10100", "10101", "10110", "10111",
-		"11000", "11001", "11010", "11011", "11100", "11101",
-		"11110", "11111" }; // binary code for register $0 ~ $31
 	char buffer[BUF_MAX] = {}; // buffer for file output
 
 	// check parameter
@@ -236,27 +230,26 @@ int main(int argc, char** argv)
 				{
 					case 4: // beq
 						// search symbol as operand
-						//for(int i = 0; i <= total_key; i++)
-						//{
-						//if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
-						//{
-						//OffsetToBin(offset, b_target);
-						//puts(offset);
-						////makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
-						////RegToBin(rgst, arg3), offset);
-						////puts(binary);
-						//lc += 4;
-						//break;
-						//}
-						////else // if not found
-						////{
-						////// error
-						////OffsetToBin(offset, 0);
-						////fprintf(stderr, "There is no match in symbol table: %s\n", offset);
-						////lc += 4;
-						////break;
-						////}
-						//}
+						for(int i = 0; i <= total_key; i++)
+						{
+							if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
+							{
+								puts(OffsetToBin(b_target));
+								//makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
+								//RegToBin(rgst, arg3), offset);
+								//puts(binary);
+								lc += 4;
+								break;
+							}
+							//else // if not found
+							//{
+							//// error
+							//OffsetToBin(offset, 0);
+							//fprintf(stderr, "There is no match in symbol table: %s\n", offset);
+							//lc += 4;
+							//break;
+							//}
+						}
 						lc += 4;
 						break;
 					case 5: // bne
@@ -322,7 +315,6 @@ int main(int argc, char** argv)
 
 /**
  * @brief make R instruction format binary code 
- * @param char* $dest
  * @param char* $op 
  * @param char* $rs
  * @param char* $rt
@@ -348,30 +340,29 @@ char* makeRformBinary(char* op, char* rs, char* rt,
 	strncat(bin, fr.shamt, (strlen(bin) + strlen(fr.shamt) + 1));
 	strncpy(fr.funct, func, 7);
 	strncat(bin, fr.funct, (strlen(bin) + strlen(fr.funct) + 1));
-	
 	return bin;
 }
 
 /**
  * @brief make I instruction format binary code
- * @param char* $dest
  * @param char* $op 
  * @param char* $rs
  * @param char* $rt
  * @param char* $imme
+ * @return char*
  */
-void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd)
+char* makeIformBinary(char* op, char* rs, char* rt, char* immd)
 {
 	format_I fi; // structure for format I instruction
 
-	strncpy(fi.op, op, 7);
-	strncpy(dest, fi.op, 7);
-	strncpy(fi.rs, rs, 6);
-	strncat(dest, fi.rs, (strlen(dest) + strlen(fi.rs) + 1));
-	strncpy(fi.rt, rt, 6);
-	strncat(dest, fi.rt, (strlen(dest) + strlen(fi.rt) + 1));
-	strncpy(fi.immd, immd, 17);
-	strncat(dest, fi.immd, (strlen(dest) + strlen(fi.immd) + 1));
+	//strncpy(fi.op, op, 7);
+	//strncpy(dest, fi.op, 7);
+	//strncpy(fi.rs, rs, 6);
+	//strncat(dest, fi.rs, (strlen(dest) + strlen(fi.rs) + 1));
+	//strncpy(fi.rt, rt, 6);
+	//strncat(dest, fi.rt, (strlen(dest) + strlen(fi.rt) + 1));
+	//strncpy(fi.immd, immd, 17);
+	//strncat(dest, fi.immd, (strlen(dest) + strlen(fi.immd) + 1));
 }
 
 /**
@@ -427,16 +418,16 @@ int isJformat(HashTable* ht, int* jk, char* arg)
  * @param int $tl target location counter
  * @return void
  */
-void OffsetToBin(char* offset, int arg)
+char* OffsetToBin(int arg)
 {
-	char tmp[17];
-	for(int i = 16; i >= 0; i--)
+	char* tmp = (char*)malloc(sizeof(char) * 17);
+	for(int i = 15; i >= 0; i--)
 	{
 		tmp[i] = (arg & 1) + '0'; 
 		arg >>= 1;
 	}
 	tmp[16] = '\0';
-	strncpy(offset, tmp, 17);
+	return tmp;
 }
 
 
