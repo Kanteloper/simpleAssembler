@@ -68,12 +68,10 @@ void insertList(List* pl, Data nd)
 
 	if(pl->head == NULL) // if first node
 	{
-		puts("work head");
 		pl->head = pl->tail = newNode;
 	}
 	else // if not
 	{
-		puts("work tail");
 		pl->tail->next = newNode;
 		pl->tail = newNode;
 	}

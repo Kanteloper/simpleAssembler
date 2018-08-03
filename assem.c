@@ -112,7 +112,6 @@ int main(int argc, char** argv)
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
-				printf("%s, %d\n", label, lc);
 				HashInsert(symTab, lc, label); // store label
 			}
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
@@ -138,7 +137,6 @@ int main(int argc, char** argv)
 	total_key = lc / 4; // save total number of location counter
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
-
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
@@ -257,8 +255,7 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin((b_target - lc - 4) / 4));
-							puts(binary);
-							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
 						else 
@@ -269,7 +266,6 @@ int main(int argc, char** argv)
 							fprintf(stderr, "There is no match in symbol table: %s\n", arg4);
 							lc += 4;
 						}
-						lc += 4;
 						break;
 					case 9: // addiu
 						lc += 4;
