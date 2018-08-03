@@ -495,7 +495,7 @@ char* RegToBin(char* arg)
  */
 int symHashFunc(Key k)
 {
-	return k % 7;
+	return k % 21;
 }
 
 /** 
