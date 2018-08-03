@@ -232,11 +232,9 @@ int main(int argc, char** argv)
 						// search symbol as operand
 						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
 						{
-							printf("%d\n", b_target);
-							puts(OffsetToBin(b_target));
-							//makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
-							//RegToBin(rgst, arg3), offset);
-							//puts(binary);
+							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
+									OffsetToBin((b_target - lc - 4) / 4));
+							puts(binary);
 							lc += 4;
 						}
 						//else // if not found
@@ -320,8 +318,7 @@ int main(int argc, char** argv)
  * @param char* $func 
  * @return char*
  */
-char* makeRformBinary(char* op, char* rs, char* rt, 
-		char* rd, char* shamt, char* func)
+char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func)
 {
 	format_R fr; // structure for format R instruction
 	char* bin = (char*)malloc(sizeof(char) * 33);
@@ -351,15 +348,16 @@ char* makeRformBinary(char* op, char* rs, char* rt,
 char* makeIformBinary(char* op, char* rs, char* rt, char* immd)
 {
 	format_I fi; // structure for format I instruction
-
-	//strncpy(fi.op, op, 7);
-	//strncpy(dest, fi.op, 7);
-	//strncpy(fi.rs, rs, 6);
-	//strncat(dest, fi.rs, (strlen(dest) + strlen(fi.rs) + 1));
-	//strncpy(fi.rt, rt, 6);
-	//strncat(dest, fi.rt, (strlen(dest) + strlen(fi.rt) + 1));
-	//strncpy(fi.immd, immd, 17);
-	//strncat(dest, fi.immd, (strlen(dest) + strlen(fi.immd) + 1));
+	char* bin = (char*)malloc(sizeof(char) * 33);
+	strncpy(fi.op, op, 7);
+	strncpy(bin, fi.op, 7);
+	strncpy(fi.rs, rs, 6);
+	strncat(bin, fi.rs, (strlen(bin) + strlen(fi.rs) + 1));
+	strncpy(fi.rt, rt, 6);
+	strncat(bin, fi.rt, (strlen(bin) + strlen(fi.rt) + 1));
+	strncpy(fi.immd, immd, 17);
+	strncat(bin, fi.immd, (strlen(bin) + strlen(fi.immd) + 1));
+	return bin;
 }
 
 /**
