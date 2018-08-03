@@ -49,6 +49,7 @@ void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
 void makeRformBinary(char* dest, char* op, char* rs, char* rt,
 									char* rd, char* shamt, char* func);
+char* getOffset(int tl, int lc);
 
 int main(int argc, char** argv)
 {
@@ -218,7 +219,8 @@ int main(int argc, char** argv)
 			}
 			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
 			{
-				int b_target;
+				int b_target; // address of branch target
+				char hex[16];
 				switch(i_key[i])
 				{
 					case 4: // beq
@@ -227,8 +229,12 @@ int main(int argc, char** argv)
 						{
 							if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
 							{
-								makeIformBinary(binary, "000100", toBinary(rgst, arg2),
-										toBinary(rgst, arg3), );
+								sprintf(hex, "%016x", b_target);
+								puts(hex);
+								//getOffset(b_target, lc);
+								//makeIformBinary(binary, "000100", toBinary(rgst, arg2),
+										//toBinary(rgst, arg3), getImmediate(b_target));
+								lc += 4;
 								break;
 							}
 							else
@@ -329,6 +335,18 @@ void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd)
 
 	
 }
+
+/**
+ * @brief get offset binary from current location to branch target
+ * @param int $tl target location counter
+ * @return char*
+ */
+char* getOffset(int tl, int lc)
+{
+	// if positive
+	// if negative
+}
+
 
 /** 
  * @brief convert register number to binary
