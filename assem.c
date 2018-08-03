@@ -44,13 +44,13 @@ typedef struct _j_struct
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-char* getRegToBin(char** rg, char* arg);
+char* RegToBin(char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
 void makeRformBinary(char* dest, char* op, char* rs, char* rtl,	char* rd, char* shamt, char* func);
 void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd);
-void toBinary(char* offset, int arg);
+void OffsetToBin(char* offset, int arg);
 int isRformat(HashTable* ht, int* rk, char* arg);
 int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
@@ -165,67 +165,67 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
-						makeRformBinary(binary, "000000", "00000", getRegToBin(rgst, arg3),
-								getRegToBin(rgst, arg2), getRegToBin(rgst, arg4), "000000");  
+						makeRformBinary(binary, "000000", "00000", RegToBin(arg3),
+								RegToBin(arg2), RegToBin(arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
-					case 2: // srl
-						makeRformBinary(binary, "000000", "00000", getRegToBin(rgst, arg3),
-								getRegToBin(rgst, arg2), getRegToBin(rgst, arg4), "000010");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
-						break;
+					//case 2: // srl
+						//makeRformBinary(binary, "000000", "00000", RegToBin(rgst, arg3),
+								//RegToBin(rgst, arg2), RegToBin(rgst, arg4), "000010");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc += 4;
+						//break;
 
-					case 8: // jr
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg2), "00000", "00000",
-								"00000", "001000");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
-						break;
+					//case 8: // jr
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg2), "00000", "00000",
+								//"00000", "001000");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc += 4;
+						//break;
 
-					case 33: // addu
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "100001");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
-						break;
+					//case 33: // addu
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "100001");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc += 4;
+						//break;
 
-					case 35: // subu
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "100011");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
-						break;
+					//case 35: // subu
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "100011");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc += 4;
+						//break;
 
-					case 36: // and
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "100100");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
-						break;
+					//case 36: // and
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "100100");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc += 4;
+						//break;
 
-					case 37: // or
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "100101");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
-						break;
+					//case 37: // or
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "100101");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc += 4;
+						//break;
 
-					case 39: // nor
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "100111");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
-						break;
+					//case 39: // nor
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "100111");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc += 4;
+						//break;
 
-					case 43: // sltu
-						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
-								getRegToBin(rgst, arg2), "00000", "101011");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
-						break;
+					//case 43: // sltu
+						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
+								//RegToBin(rgst, arg2), "00000", "101011");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc += 4;
+						//break;
 				}
 			} // r format opTab search end
 			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
@@ -240,10 +240,10 @@ int main(int argc, char** argv)
 						//{
 						//if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
 						//{
-						//toBinary(offset, b_target);
+						//OffsetToBin(offset, b_target);
 						//puts(offset);
-						////makeIformBinary(binary, "000100", getRegToBin(rgst, arg2),
-						////getRegToBin(rgst, arg3), offset);
+						////makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
+						////RegToBin(rgst, arg3), offset);
 						////puts(binary);
 						//lc += 4;
 						//break;
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 						////else // if not found
 						////{
 						////// error
-						////toBinary(offset, 0);
+						////OffsetToBin(offset, 0);
 						////fprintf(stderr, "There is no match in symbol table: %s\n", offset);
 						////lc += 4;
 						////break;
@@ -424,7 +424,7 @@ int isJformat(HashTable* ht, int* jk, char* arg)
  * @param int $tl target location counter
  * @return void
  */
-void toBinary(char* offset, int arg)
+void OffsetToBin(char* offset, int arg)
 {
 	char tmp[17];
 	for(int i = 16; i >= 0; i--)
@@ -443,15 +443,23 @@ void toBinary(char* offset, int arg)
  * @param char* &arg
  * @return char*
  */
-char* getRegToBin(char** rg, char* arg)
+char* RegToBin(char* arg)
 {
-	int i = 0;
+	int nReg = 0;
+	char* bin = (char*)malloc(sizeof(char) * 6);
 	char* tmp = (char*)malloc(sizeof(char) * 5);
+
 	strcpy(tmp, arg);
 	tmp = strtok(tmp, "$");
 	tmp = strtok(tmp, ",");
-	i = atoi(tmp);
-	return rg[i];
+	nReg = atoi(tmp);
+	for(int i = 4; i >= 0; i--)
+	{
+		bin[i] = (nReg & 1) + '0'; 
+		nReg >>= 1;
+	}
+	bin[5] = '\0';
+	return bin;
 }
 /**
  * @brief hash function for symbol table 
