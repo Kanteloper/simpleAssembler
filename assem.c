@@ -54,6 +54,7 @@ char* OffsetToBin(int arg);
 int isRformat(HashTable* ht, int* rk, char* arg);
 int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
+int isOperand(HashTable* ht, int num, char* oprn);
 
 int main(int argc, char** argv)
 {
@@ -224,32 +225,28 @@ int main(int argc, char** argv)
 			} // r format opTab search end
 			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
 			{
-				char offset[17]; // binary for offset
 				int b_target; // address of branch target
 				switch(i_key[idx])
 				{
 					case 4: // beq
 						// search symbol as operand
-						for(int i = 0; i <= total_key; i++)
+						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
 						{
-							if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
-							{
-								puts(OffsetToBin(b_target));
-								//makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
-								//RegToBin(rgst, arg3), offset);
-								//puts(binary);
-								lc += 4;
-								break;
-							}
-							//else // if not found
-							//{
-							//// error
-							//OffsetToBin(offset, 0);
-							//fprintf(stderr, "There is no match in symbol table: %s\n", offset);
-							//lc += 4;
-							//break;
-							//}
+							printf("%d\n", b_target);
+							puts(OffsetToBin(b_target));
+							//makeIformBinary(binary, "000100", RegToBin(rgst, arg2),
+							//RegToBin(rgst, arg3), offset);
+							//puts(binary);
+							lc += 4;
 						}
+						//else // if not found
+						//{
+						//// error
+						//OffsetToBin(offset, 0);
+						//fprintf(stderr, "There is no match in symbol table: %s\n", offset);
+						//lc += 4;
+						//break;
+						//}
 						lc += 4;
 						break;
 					case 5: // bne
@@ -366,10 +363,27 @@ char* makeIformBinary(char* op, char* rs, char* rt, char* immd)
 }
 
 /**
+ * @brief check whether the operand is in symbol table
+ * @param HashTable* $ht
+ * @param int $num
+ * @param char* oprn
+ * @return int
+ */
+int isOperand(HashTable* ht, int num, char* oprn)
+{
+	int target = 0;
+	for(int i = 0; i <= num; i++)
+	{
+		if((target = getHashAddr(ht, i, oprn)) != -1) return target; // if found
+	}
+	return -1;
+}
+
+/**
  * @brief check the operator is R format
- * @param HashTable* ht rOpTab
- * @param int* rk r_key array
- * @param char* arg
+ * @param HashTable* $ht rOpTab
+ * @param int* $rk r_key array
+ * @param char* $arg
  * @return int
  */
 int isRformat(HashTable* ht, int* rk, char* arg)
@@ -383,8 +397,8 @@ int isRformat(HashTable* ht, int* rk, char* arg)
 
 /**
  * @brief check the operator is I format
- * @param HashTable* ht rOpTab
- * @param int* rk r_key array
+ * @param HashTable* $ht iOpTab
+ * @param int* $ik i_key array
  * @param char* arg
  * @return int
  */
@@ -399,8 +413,8 @@ int isIformat(HashTable* ht, int* ik, char* arg)
 
 /**
  * @brief check the operator is J format
- * @param HashTable* ht rOpTab
- * @param int* rk r_key array
+ * @param HashTable* $ht jOpTab
+ * @param int* $jk j_key array
  * @param char* arg
  * @return int
  */
@@ -434,7 +448,7 @@ char* OffsetToBin(int arg)
 /** 
  * @brief convert register number to binary
  * @param char** $rg_array for binary value of register
- * @param char* &arg
+ * @param char* $arg
  * @return char*
  */
 char* RegToBin(char* arg)
