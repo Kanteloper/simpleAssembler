@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
 #include <regex.h>
@@ -43,24 +44,27 @@ typedef struct _j_struct
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-char* toBinary(char** rg, char* arg);
+char* getRegToBin(char** rg, char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
-void makeRformBinary(char* dest, char* op, char* rs, char* rt,
-									char* rd, char* shamt, char* func);
-char* getOffset(int tl, int lc);
+void makeRformBinary(char* dest, char* op, char* rs, char* rtl,	char* rd, char* shamt, char* func);
+void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd);
+void toBinary(char* offset, int arg);
+int isRformat(HashTable* ht, int* rk, char* arg);
+int isIformat(HashTable* ht, int* ik, char* arg);
+int isJformat(HashTable* ht, int* jk, char* arg);
 
 int main(int argc, char** argv)
 {
 	FILE *fp;
 	char line[STR_MAX];
 	char arg1[STR_MAX] = {};
-	char arg2[STR_MAX] = {};
+	char arg2[STR_MAX] = {}; 
 	char arg3[STR_MAX] = {}; 
 	char arg4[STR_MAX] = {};
 	int r_key[9] = { 0x21, 0x08, 0x24, 0x2b, 0x00, 0x02, 0x27, 0x25, 0x23 };
-	int i_key[8] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b };
+	int i_key[9] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b, 0x0d };
 	int j_key[2] = { 0x03, 0x02 };
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
@@ -72,11 +76,11 @@ int main(int argc, char** argv)
 	HashTable* jOpTab; // operator table for J format instruction
 	HashTable* symTab; // symbol table
 	char *rgst[] = { "00000", "00001", "00010", "00011", "00100", "00101",
-						 "00110", "00111", "01000", "01001", "01010", "01011",
-						 "01100", "01101", "01110", "01111", "10000", "10001",
-						 "10010", "10011", "10100", "10101", "10110", "10111",
-						 "11000", "11001", "11010", "11011", "11100", "11101",
-						 "11110", "11111" }; // binary code for register $0 ~ $31
+		"00110", "00111", "01000", "01001", "01010", "01011",
+		"01100", "01101", "01110", "01111", "10000", "10001",
+		"10010", "10011", "10100", "10101", "10110", "10111",
+		"11000", "11001", "11010", "11011", "11100", "11101",
+		"11110", "11111" }; // binary code for register $0 ~ $31
 	char buffer[BUF_MAX] = {}; // buffer for file output
 
 	// check parameter
@@ -100,7 +104,6 @@ int main(int argc, char** argv)
 	rOpTab = createTable(TB_MAX, opHashFunc); set_rOpTab(rOpTab);
 	iOpTab = createTable(TB_MAX, opHashFunc); set_iOpTab(iOpTab);
 	jOpTab = createTable(TB_MAX, opHashFunc); set_jOpTab(jOpTab);
-
 	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
 	// start first pass	
@@ -109,9 +112,9 @@ int main(int argc, char** argv)
 		char* label;
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
-		if(!rt_lb) 
+		if(!rt_lb) // if arg1 label 
 		{
-			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0) // if arg1 label
+			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
 				HashInsert(symTab, lc, label); // store label
@@ -136,7 +139,6 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-
 	total_key = lc / 4; // save total number of location counter
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
@@ -144,131 +146,162 @@ int main(int argc, char** argv)
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
-		char binary[33]; 
-
+		int idx = -1;
+		char binary[33]; // for binary code
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		for(int i = 0; i < 9; i++)
+		//printf("%s, %d\n", arg1, lc);
+		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
+		if(!rt_lb) // if arg1 label
 		{
-			if(HashSearch(rOpTab, r_key[i], arg1) != NULL) // if R format instruction
+			if(strcmp(arg2, ".word") == 0) lc += 4; // if arg2 .word
+		}
+		else if(strcmp(arg1, ".word") == 0) lc += 4; // if arg1 .word
+		else // if operator
+		{
+			// search each opTab
+			if((idx = isRformat(rOpTab, r_key, arg1)) != -1) // if R format instruction
 			{
-				switch(r_key[i])
+				switch(r_key[idx])
 				{
+					//convert each instruction to binary
 					case 0: // sll
-						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
-								toBinary(rgst, arg2), toBinary(rgst, arg4), "000000");  
+						makeRformBinary(binary, "000000", "00000", getRegToBin(rgst, arg3),
+								getRegToBin(rgst, arg2), getRegToBin(rgst, arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
 					case 2: // srl
-						makeRformBinary(binary, "000000", "00000", toBinary(rgst, arg3),
-								toBinary(rgst, arg2), toBinary(rgst, arg4), "000010");  
+						makeRformBinary(binary, "000000", "00000", getRegToBin(rgst, arg3),
+								getRegToBin(rgst, arg2), getRegToBin(rgst, arg4), "000010");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
 					case 8: // jr
-						makeRformBinary(binary, "000000", toBinary(rgst, arg2), "00000", "00000",
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg2), "00000", "00000",
 								"00000", "001000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 
 					case 33: // addu
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "100001");  
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "100001");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 
 					case 35: // subu
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "100011");
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "100011");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
 					case 36: // and
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "100100");  
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "100100");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 
 					case 37: // or
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "100101");
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "100101");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
 					case 39: // nor
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "100111");
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "100111");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
 					case 43: // sltu
-						makeRformBinary(binary, "000000", toBinary(rgst, arg3), toBinary(rgst, arg4),
-								toBinary(rgst, arg2), "00000", "101011");  
+						makeRformBinary(binary, "000000", getRegToBin(rgst, arg3), getRegToBin(rgst, arg4),
+								getRegToBin(rgst, arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 				}
-			}
-			else if(HashSearch(iOpTab, i_key[i], arg1) != NULL) // if I format instruction 
+			} // r format opTab search end
+			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
 			{
+				char offset[17]; // binary for offset
 				int b_target; // address of branch target
-				char hex[16];
-				switch(i_key[i])
+				switch(i_key[idx])
 				{
 					case 4: // beq
 						// search symbol as operand
-						for(int i = 0; i <= total_key; i++)
-						{
-							if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
-							{
-								sprintf(hex, "%016x", b_target);
-								puts(hex);
-								//getOffset(b_target, lc);
-								//makeIformBinary(binary, "000100", toBinary(rgst, arg2),
-										//toBinary(rgst, arg3), getImmediate(b_target));
-								lc += 4;
-								break;
-							}
-							else
-							{
-								// set operand address as 0
-								// error flag
-							}
-						}
+						//for(int i = 0; i <= total_key; i++)
+						//{
+						//if((b_target = getHashAddr(symTab, i, arg4)) != -1) // if found
+						//{
+						//toBinary(offset, b_target);
+						//puts(offset);
+						////makeIformBinary(binary, "000100", getRegToBin(rgst, arg2),
+						////getRegToBin(rgst, arg3), offset);
+						////puts(binary);
+						//lc += 4;
+						//break;
+						//}
+						////else // if not found
+						////{
+						////// error
+						////toBinary(offset, 0);
+						////fprintf(stderr, "There is no match in symbol table: %s\n", offset);
+						////lc += 4;
+						////break;
+						////}
+						//}
+						lc += 4;
 						break;
 					case 5: // bne
+						lc += 4;
 						break;
 					case 9: // addiu
+						lc += 4;
 						break;
 					case 11: // sltiu
+						lc += 4;
 						break;
 					case 12: // andi
+						lc += 4;
+						break;
+					case 13: // ori
+						lc += 4;
 						break;
 					case 28: // la
+						lc += 4;
 						break;
 					case 35: // lw
+						lc += 4;
 						break;
 					case 43: // sw
+						lc += 4;
 						break;
 				}
-			}
-			//else if(HashSearch(jOpTab, j_key[i], arg1) != NULL)// if J format instruction
-			//{
-				//break;
-			//}
-		}
-		// else if I format instruction
-		// else J format instructions
+			} // i format table search end
+			else if((idx = isJformat(jOpTab, j_key, arg1)) != -1) // if I format instruction 
+			{
+				switch(j_key[idx])
+				{
+					case 2: // j
+						lc += 4;
+						break;
+
+					case 3: // jal
+						lc += 4;
+						break;
+				}
+			} // j format table search end
+		} // done operator found
+
 		arg2[0] = '\0'; // flush arg2  
-	}
+	} // while end
 
 	puts(buffer);
 
@@ -285,7 +318,7 @@ int main(int argc, char** argv)
 	free(jOpTab);
 	free(symTab);
 	return 0;
-}
+} 
 
 /**
  * @brief make R instruction format binary code 
@@ -329,22 +362,78 @@ void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd)
 	format_I fi; // structure for format I instruction
 
 	strncpy(fi.op, op, 7);
+	strncpy(dest, fi.op, 7);
 	strncpy(fi.rs, rs, 6);
+	strncat(dest, fi.rs, (strlen(dest) + strlen(fi.rs) + 1));
 	strncpy(fi.rt, rt, 6);
+	strncat(dest, fi.rt, (strlen(dest) + strlen(fi.rt) + 1));
 	strncpy(fi.immd, immd, 17);
-
-	
+	strncat(dest, fi.immd, (strlen(dest) + strlen(fi.immd) + 1));
 }
 
 /**
- * @brief get offset binary from current location to branch target
- * @param int $tl target location counter
- * @return char*
+ * @brief check the operator is R format
+ * @param HashTable* ht rOpTab
+ * @param int* rk r_key array
+ * @param char* arg
+ * @return int
  */
-char* getOffset(int tl, int lc)
+int isRformat(HashTable* ht, int* rk, char* arg)
 {
-	// if positive
-	// if negative
+	for(int i = 0; i < 9; i++)
+	{
+		if(HashSearch(ht, rk[i], arg) != NULL) return i;
+	}
+	return -1;
+}
+
+/**
+ * @brief check the operator is I format
+ * @param HashTable* ht rOpTab
+ * @param int* rk r_key array
+ * @param char* arg
+ * @return int
+ */
+int isIformat(HashTable* ht, int* ik, char* arg)
+{
+	for(int i = 0; i < 9; i++)
+	{
+		if(HashSearch(ht, ik[i], arg) != NULL) return i;
+	}
+	return -1;
+}
+
+/**
+ * @brief check the operator is J format
+ * @param HashTable* ht rOpTab
+ * @param int* rk r_key array
+ * @param char* arg
+ * @return int
+ */
+int isJformat(HashTable* ht, int* jk, char* arg)
+{
+	for(int i = 0; i < 2; i++)
+	{
+		if(HashSearch(ht, jk[i], arg) != NULL) return i;
+	}
+	return -1;
+}
+
+/**
+ * @brief return integer input to string represented binary 
+ * @param int $tl target location counter
+ * @return void
+ */
+void toBinary(char* offset, int arg)
+{
+	char tmp[17];
+	for(int i = 16; i >= 0; i--)
+	{
+		tmp[i] = (arg & 1) + '0'; 
+		arg >>= 1;
+	}
+	tmp[16] = '\0';
+	strncpy(offset, tmp, 17);
 }
 
 
@@ -354,7 +443,7 @@ char* getOffset(int tl, int lc)
  * @param char* &arg
  * @return char*
  */
-char* toBinary(char** rg, char* arg)
+char* getRegToBin(char** rg, char* arg)
 {
 	int i = 0;
 	char* tmp = (char*)malloc(sizeof(char) * 5);
@@ -408,7 +497,7 @@ void set_rOpTab(HashTable* ot)
  */
 void set_iOpTab(HashTable* ot)
 {
-	// total 8 operators
+	// total 9 operators
 	HashInsert(ot, 0x09, "addiu");
 	HashInsert(ot, 0x0b, "sltiu");
 	HashInsert(ot, 0x0c, "andi");
@@ -417,6 +506,7 @@ void set_iOpTab(HashTable* ot)
 	HashInsert(ot, 0x05, "bne");
 	HashInsert(ot, 0x2b, "sw");
 	HashInsert(ot, 0x1c, "la");
+	HashInsert(ot, 0x0d, "ori");
 }
 
 /**
