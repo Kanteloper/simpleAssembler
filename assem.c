@@ -48,7 +48,7 @@ char* RegToBin(char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
-void makeRformBinary(char* dest, char* op, char* rs, char* rtl,	char* rd, char* shamt, char* func);
+char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
 void makeIformBinary(char* dest, char* op, char* rs, char* rt, char* immd);
 void OffsetToBin(char* offset, int arg);
 int isRformat(HashTable* ht, int* rk, char* arg);
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		int idx = -1;
-		char binary[33]; // for binary code
+		char* binary; // for binary code
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
@@ -165,67 +165,67 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
-						makeRformBinary(binary, "000000", "00000", RegToBin(arg3),
-								RegToBin(arg2), RegToBin(arg4), "000000");  
+						binary = makeRformBinary("000000", "00000", RegToBin(arg3), RegToBin(arg2), 
+								RegToBin(arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc += 4;
 						break;
 
-					//case 2: // srl
-						//makeRformBinary(binary, "000000", "00000", RegToBin(rgst, arg3),
-								//RegToBin(rgst, arg2), RegToBin(rgst, arg4), "000010");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc += 4;
-						//break;
+					case 2: // srl
+						binary = makeRformBinary("000000", "00000", RegToBin(arg3),
+								RegToBin(arg2), RegToBin(arg4), "000010");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
+						break;
 
-					//case 8: // jr
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg2), "00000", "00000",
-								//"00000", "001000");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc += 4;
-						//break;
+					case 8: // jr
+						binary = makeRformBinary("000000", RegToBin(arg2), "00000", "00000",
+								"00000", "001000");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
+						break;
 
-					//case 33: // addu
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "100001");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc += 4;
-						//break;
+					case 33: // addu
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "100001");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
+						break;
 
-					//case 35: // subu
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "100011");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc += 4;
-						//break;
+					case 35: // subu
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "100011");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
+						break;
 
-					//case 36: // and
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "100100");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc += 4;
-						//break;
+					case 36: // and
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "100100");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
+						break;
 
-					//case 37: // or
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "100101");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc += 4;
-						//break;
+					case 37: // or
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "100101");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
+						break;
 
-					//case 39: // nor
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "100111");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc += 4;
-						//break;
+					case 39: // nor
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "100111");
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc += 4;
+						break;
 
-					//case 43: // sltu
-						//makeRformBinary(binary, "000000", RegToBin(rgst, arg3), RegToBin(rgst, arg4),
-								//RegToBin(rgst, arg2), "00000", "101011");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc += 4;
-						//break;
+					case 43: // sltu
+						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+								RegToBin(arg2), "00000", "101011");  
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
+						break;
 				}
 			} // r format opTab search end
 			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
@@ -329,24 +329,27 @@ int main(int argc, char** argv)
  * @param char* $rd
  * @param char* $shamt
  * @param char* $func 
+ * @return char*
  */
-void makeRformBinary(char* dest, char* op, char* rs, char* rt, 
+char* makeRformBinary(char* op, char* rs, char* rt, 
 		char* rd, char* shamt, char* func)
 {
 	format_R fr; // structure for format R instruction
-
+	char* bin = (char*)malloc(sizeof(char) * 33);
 	strncpy(fr.op, op, 7);
-	strncpy(dest, fr.op, 7);
+	strncpy(bin, fr.op, 7);
 	strncpy(fr.rs, rs, 6);
-	strncat(dest, fr.rs, (strlen(dest) + strlen(fr.rs) + 1));
+	strncat(bin, fr.rs, (strlen(bin) + strlen(fr.rs) + 1));
 	strncpy(fr.rt, rt, 6);
-	strncat(dest, fr.rt, (strlen(dest) + strlen(fr.rt) + 1));
+	strncat(bin, fr.rt, (strlen(bin) + strlen(fr.rt) + 1));
 	strncpy(fr.rd, rd, 6);
-	strncat(dest, fr.rd, (strlen(dest) + strlen(fr.rd) + 1));
+	strncat(bin, fr.rd, (strlen(bin) + strlen(fr.rd) + 1));
 	strncpy(fr.shamt, shamt, 6);
-	strncat(dest, fr.shamt, (strlen(dest) + strlen(fr.shamt) + 1));
+	strncat(bin, fr.shamt, (strlen(bin) + strlen(fr.shamt) + 1));
 	strncpy(fr.funct, func, 7);
-	strncat(dest, fr.funct, (strlen(dest) + strlen(fr.funct) + 1));
+	strncat(bin, fr.funct, (strlen(bin) + strlen(fr.funct) + 1));
+	
+	return bin;
 }
 
 /**
