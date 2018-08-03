@@ -55,7 +55,8 @@ void HashInsert(HashTable* ht, Key k, Value v)
 		return;
 	}
 	else //if not 
-	{	
+	{
+		puts("insert");
 		insertList(ht->list[hv], newData); // insert data
 	}
 

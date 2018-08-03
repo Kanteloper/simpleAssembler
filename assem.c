@@ -112,6 +112,7 @@ int main(int argc, char** argv)
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
+				printf("%s, %d\n", label, lc);
 				HashInsert(symTab, lc, label); // store label
 			}
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
@@ -137,6 +138,7 @@ int main(int argc, char** argv)
 	total_key = lc / 4; // save total number of location counter
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
+
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
@@ -234,20 +236,39 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin((b_target - lc - 4) / 4));
-							puts(binary);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-						//else // if not found
-						//{
-						//// error
-						//OffsetToBin(offset, 0);
-						//fprintf(stderr, "There is no match in symbol table: %s\n", offset);
-						//lc += 4;
-						//break;
-						//}
+						else // if not found
+						{
+							/* error handling when there is no matched operand in symbol table 
+							 * set 0 as address of operand & alert error flag to user
+							 */
+							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3),
+									OffsetToBin(0));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							fprintf(stderr, "There is no match in symbol table: %s\n", arg4);
+							lc += 4;
+						}
 						lc += 4;
 						break;
 					case 5: // bne
+						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
+						{
+							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
+									OffsetToBin((b_target - lc - 4) / 4));
+							puts(binary);
+							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+						else 
+						{
+							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
+									OffsetToBin(0));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							fprintf(stderr, "There is no match in symbol table: %s\n", arg4);
+							lc += 4;
+						}
 						lc += 4;
 						break;
 					case 9: // addiu
@@ -474,7 +495,7 @@ char* RegToBin(char* arg)
  */
 int symHashFunc(Key k)
 {
-	return k % 20;
+	return k % 7;
 }
 
 /** 
