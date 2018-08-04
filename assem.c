@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 						lc += 4;
 						break;
 					case 5: // bne
-						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
+						if((b_target = isOperand(symTab, total_key, arg4)) != -1)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin((b_target - lc - 4) / 4));
@@ -268,7 +268,20 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 9: // addiu
-						lc += 4;
+						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
+						{
+							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((int)strtol(arg4, NULL, 16)));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+						else
+						{
+							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((int)strtol(arg4, NULL, 16)));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
 						break;
 					case 11: // sltiu
 						lc += 4;
