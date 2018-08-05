@@ -70,7 +70,6 @@ int main(int argc, char** argv)
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc = 0; // location counter
-	int total_key = 0; // total number of key
 	int txt_cnt = 0; int data_cnt = 0; // number of text and data
 	HashTable* rOpTab; // operator table for R format instruction
 	HashTable* iOpTab; // operator table for I format instruction
@@ -112,6 +111,7 @@ int main(int argc, char** argv)
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
+				printf("%s, %d\n", label, lc);
 				HashInsert(symTab, lc, label); // store label
 			}
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
@@ -134,9 +134,9 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	}
 
-	total_key = lc / 4; // save total number of location counter
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
+	printf("search: %s\n", HashSearch(symTab, 60, "lab5"));
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
@@ -230,7 +230,7 @@ int main(int argc, char** argv)
 				{
 					case 4: // beq
 						// search symbol as operand
-						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
 							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin((b_target - lc - 4) / 4));
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
 						lc += 4;
 						break;
 					case 5: // bne
-						if((b_target = isOperand(symTab, total_key, arg4)) != -1)
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin((b_target - lc - 4) / 4));
@@ -268,14 +268,14 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 9: // addiu
-						if((b_target = isOperand(symTab, total_key, arg4)) != -1) // if found
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((int)strtol(arg4, NULL, 16)));
+									OffsetToBin((b_target - lc - 4) / 4));
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-						else
+						else // if constant
 						{
 							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
 									OffsetToBin((int)strtol(arg4, NULL, 16)));
@@ -284,7 +284,24 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 11: // sltiu
-						lc += 4;
+						// sltiu $rt $rs imme, 001011
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+						{
+							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((b_target - lc - 4) / 4));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+						else // if constant
+						{
+							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((int)strtol(arg4, NULL, 16)));
+							//puts(binary);
+							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+
+
 						break;
 					case 12: // andi
 						lc += 4;
@@ -400,7 +417,7 @@ char* makeIformBinary(char* op, char* rs, char* rt, char* immd)
 int isOperand(HashTable* ht, int num, char* oprn)
 {
 	int target = 0;
-	for(int i = 0; i <= num; i++)
+	for(int i = 0; i < num; i++)
 	{
 		if((target = getHashAddr(ht, i, oprn)) != -1) return target; // if found
 	}
