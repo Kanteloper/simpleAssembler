@@ -159,6 +159,7 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
+						// only unsigned operations
 						binary = makeRformBinary("000000", "00000", RegToBin(arg3), RegToBin(arg2), 
 								RegToBin(arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
@@ -166,6 +167,7 @@ int main(int argc, char** argv)
 						break;
 
 					case 2: // srl
+						// only unsigned operations
 						binary = makeRformBinary("000000", "00000", RegToBin(arg3),
 								RegToBin(arg2), RegToBin(arg4), "000010");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
@@ -180,6 +182,7 @@ int main(int argc, char** argv)
 						break;
 
 					case 33: // addu
+						// only unsigned operations
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100001");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
@@ -187,6 +190,7 @@ int main(int argc, char** argv)
 						break;
 
 					case 35: // subu
+						// only unsigned operations
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100011");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
@@ -215,6 +219,7 @@ int main(int argc, char** argv)
 						break;
 
 					case 43: // sltu
+						// only unsigned operations
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
@@ -228,6 +233,7 @@ int main(int argc, char** argv)
 				switch(i_key[idx])
 				{
 					case 4: // beq
+						//immediate field are sign extended to allow negative
 						// search symbol as operand
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
@@ -250,6 +256,7 @@ int main(int argc, char** argv)
 						lc += 4;
 						break;
 					case 5: // bne
+						//immediate field are sign extended to allow negative
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
@@ -267,6 +274,7 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 9: // addiu
+						// only unsigned operations
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
@@ -283,7 +291,7 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 11: // sltiu
-						// sltiu $rt $rs imme, 001011
+						// only unsigned operations
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
@@ -295,13 +303,25 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
 									OffsetToBin(strToInt(arg4)));
-							puts(binary);
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
 						break;
 					case 12: // andi
-						lc += 4;
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+						{
+							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((b_target - lc - 4) / 4));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+						else // if constant
+						{
+							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin(strToInt(arg4)));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
 						break;
 					case 13: // ori
 						lc += 4;
@@ -310,9 +330,11 @@ int main(int argc, char** argv)
 						lc += 4;
 						break;
 					case 35: // lw
+						//immediate field are sign extended to allow negative
 						lc += 4;
 						break;
 					case 43: // sw
+						//immediate field are sign extended to allow negative
 						lc += 4;
 						break;
 				}
