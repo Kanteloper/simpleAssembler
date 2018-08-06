@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	char arg3[STR_MAX] = {}; 
 	char arg4[STR_MAX] = {};
 	int r_key[9] = { 0x21, 0x08, 0x24, 0x2b, 0x00, 0x02, 0x27, 0x25, 0x23 };
-	int i_key[9] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x1c, 0x05, 0x2b, 0x0d };
+	int i_key[9] = { 0x09, 0x0b, 0x0c, 0x23, 0x04, 0x05, 0x2b, 0x0d, 0x0f };
 	int j_key[2] = { 0x03, 0x02 };
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 					case 13: // ori
 						lc += 4;
 						break;
-					case 28: // la
+					case 15: // lui
 						lc += 4;
 						break;
 					case 35: // lw
@@ -355,6 +355,10 @@ int main(int argc, char** argv)
 						break;
 				}
 			} // j format table search end
+			else // la
+			{
+
+			}
 		} // done operator found
 
 		arg2[0] = '\0'; // flush arg2  
@@ -596,7 +600,7 @@ void set_rOpTab(HashTable* ot)
  */
 void set_iOpTab(HashTable* ot)
 {
-	// total 9 operators
+	// total 10 operators
 	HashInsert(ot, 0x09, "addiu");
 	HashInsert(ot, 0x0b, "sltiu");
 	HashInsert(ot, 0x0c, "andi");
@@ -604,8 +608,8 @@ void set_iOpTab(HashTable* ot)
 	HashInsert(ot, 0x04, "beq");
 	HashInsert(ot, 0x05, "bne");
 	HashInsert(ot, 0x2b, "sw");
-	HashInsert(ot, 0x1c, "la");
 	HashInsert(ot, 0x0d, "ori");
+	HashInsert(ot, 0x0f, "lui");
 }
 
 /**
