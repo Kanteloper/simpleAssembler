@@ -55,6 +55,7 @@ int isRformat(HashTable* ht, int* rk, char* arg);
 int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
 int isOperand(HashTable* ht, int num, char* oprn);
+int strToInt(char* arg);
 
 int main(int argc, char** argv)
 {
@@ -111,7 +112,6 @@ int main(int argc, char** argv)
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
-				printf("%s, %d\n", label, lc);
 				HashInsert(symTab, lc, label); // store label
 			}
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
@@ -136,7 +136,6 @@ int main(int argc, char** argv)
 
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc = 0; // reset location counter
-	printf("search: %s\n", HashSearch(symTab, 60, "lab5"));
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
@@ -258,7 +257,7 @@ int main(int argc, char** argv)
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-						else 
+						else  
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin(0));
@@ -278,7 +277,7 @@ int main(int argc, char** argv)
 						else // if constant
 						{
 							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((int)strtol(arg4, NULL, 16)));
+									OffsetToBin(strToInt(arg4)));
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
@@ -295,13 +294,11 @@ int main(int argc, char** argv)
 						else // if constant
 						{
 							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((int)strtol(arg4, NULL, 16)));
-							//puts(binary);
-							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+									OffsetToBin(strToInt(arg4)));
+							puts(binary);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-
-
 						break;
 					case 12: // andi
 						lc += 4;
@@ -470,6 +467,22 @@ int isJformat(HashTable* ht, int* jk, char* arg)
 		if(HashSearch(ht, jk[i], arg) != NULL) return i;
 	}
 	return -1;
+}
+
+/**
+ * @brief convert string to decimal or hexadecimal integer
+ * @param char* arg
+ * @return int
+ */
+int strToInt(char* arg)
+{
+	regex_t rg_hex;
+	int rt = regcomp(&rg_hex, "[0][x]", 0);
+	rt = regexec(&rg_hex, arg, 0, NULL, 0); // execute regexec
+	if(!rt) // if hex
+		return (int)strtol(arg, NULL, 16);
+	else // if dec
+		return (int)strtol(arg, NULL, 10);
 }
 
 /**
