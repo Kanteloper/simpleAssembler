@@ -327,7 +327,20 @@ int main(int argc, char** argv)
 						}
 						break;
 					case 13: // ori
-						lc += 4;
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+						{
+							binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin((b_target - lc - 4) / 4));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
+						else 
+						{
+							binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
+									OffsetToBin(strToInt(arg4)));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							lc += 4;
+						}
 						break;
 					case 15: // lui
 						lc += 4;
@@ -357,7 +370,7 @@ int main(int argc, char** argv)
 			} // j format table search end
 			else // la
 			{
-
+				lc += 4;
 			}
 		} // done operator found
 
