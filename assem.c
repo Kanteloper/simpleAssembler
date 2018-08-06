@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 		int idx = -1;
 		char* binary; // for binary code
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		printf("%s, %d\n", arg1, lc);
+		//printf("%s, %d\n", arg1, lc);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
 		if(!rt_lb) // if arg1 label
 		{
