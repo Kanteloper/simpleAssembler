@@ -111,19 +111,23 @@ int main(int argc, char** argv)
 		{
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
-				label = strtok(arg1, ":");
-				HashInsert(symTab, lc, label); // store label
+				if(strcmp(arg1, ".word") == 0) // if arg1 .word
+				{
+					lc += 4;
+					data_cnt++;
+				}
+				else
+				{
+					label = strtok(arg1, ":");
+					printf("%s, %d\n", label, lc);
+					HashInsert(symTab, lc, label); // store label
+				}
 			}
 			if(strcmp(arg2, ".word") == 0) // if arg2 .word
 			{
 				lc += 4;
 				data_cnt++;
 			}
-		}
-		else if(strcmp(arg1, ".word") == 0) // if arg1 .word
-		{
-			lc += 4;
-			data_cnt++;
 		}
 		else // if operator
 		{
@@ -319,6 +323,7 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
 									OffsetToBin(strToInt(arg4)));
+							puts(binary);
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
