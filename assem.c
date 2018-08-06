@@ -119,7 +119,6 @@ int main(int argc, char** argv)
 				else
 				{
 					label = strtok(arg1, ":");
-					printf("%s, %d\n", label, lc);
 					HashInsert(symTab, lc, label); // store label
 				}
 			}
