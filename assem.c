@@ -302,7 +302,7 @@ int main(int argc, char** argv)
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-						else // if constant
+						else
 						{
 							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
 									OffsetToBin(strToInt(arg4)));
@@ -318,11 +318,10 @@ int main(int argc, char** argv)
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
-						else // if constant
+						else 
 						{
 							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
 									OffsetToBin(strToInt(arg4)));
-							puts(binary);
 							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 							lc += 4;
 						}
