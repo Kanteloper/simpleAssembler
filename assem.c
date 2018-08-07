@@ -362,6 +362,10 @@ int main(int argc, char** argv)
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
+						tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
+						tmp_reg = getRegister(arg3); // filter arg3 for register
+						binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 				}
