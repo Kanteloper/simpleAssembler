@@ -339,7 +339,7 @@ int main(int argc, char** argv)
 						lc += 4;
 						break;
 					case 15: // lui
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+						if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
 						{
 							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
 									OffsetToBin((b_target - lc - 4) / 4));
@@ -347,7 +347,8 @@ int main(int argc, char** argv)
 						else 
 						{
 							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									OffsetToBin(strToInt(arg4)));
+									OffsetToBin(strToInt(arg3)));
+							puts(binary);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
