@@ -348,7 +348,6 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
 									OffsetToBin(strToInt(arg3)));
-							puts(binary);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
