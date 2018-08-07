@@ -56,6 +56,8 @@ int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
 int isOperand(HashTable* ht, int num, char* oprn);
 int strToInt(char* arg);
+char* getImmediate(char* arg);
+char* getRegister(char* arg);
 
 int main(int argc, char** argv)
 {
@@ -145,6 +147,11 @@ int main(int argc, char** argv)
 	{
 		int idx = -1;
 		char* binary; // for binary code
+		int b_target; // address of branch target
+		char* tmp;
+		char* tmp_immd;  
+		char* tmp_reg;
+
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
@@ -235,7 +242,6 @@ int main(int argc, char** argv)
 			} // r format opTab search end
 			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
 			{
-				int b_target; // address of branch target
 				switch(i_key[idx])
 				{
 					case 4: // beq
@@ -348,6 +354,10 @@ int main(int argc, char** argv)
 						break;
 					case 35: // lw
 						//immediate field are sign extended to allow negative
+						tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
+						tmp_reg = getRegister(arg3); // filter arg3 for register
+						binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc += 4;
 						break;
 					case 43: // sw
@@ -393,7 +403,34 @@ int main(int argc, char** argv)
 	free(jOpTab);
 	free(symTab);
 	return 0;
-} 
+}
+
+/**
+ * @brief get register string from argument
+ * @param char* $arg 
+ * @return char*
+ */
+char* getRegister(char* arg)
+{
+	char* tmp = malloc(sizeof(char) * (strlen(arg) + 1));
+	strncpy(tmp, arg, (strlen(arg) + 1));
+	tmp = strtok(tmp, "(");
+	tmp = strtok(NULL, "(");
+	return tmp;
+}
+
+/**
+ * @brief get immediate string from argument
+ * @param char* $arg
+ * @return char*
+ */
+char* getImmediate(char* arg)
+{
+	char* tmp = malloc(sizeof(char) * (strlen(arg) + 1));
+	strncpy(tmp, arg, (strlen(arg) + 1));
+	tmp = strtok(tmp, "(");
+	return tmp;
+}
 
 /**
  * @brief make R instruction format binary code 
@@ -561,6 +598,7 @@ char* RegToBin(char* arg)
 	strcpy(tmp, arg);
 	tmp = strtok(tmp, "$");
 	tmp = strtok(tmp, ",");
+	tmp = strtok(tmp, ")");
 	nReg = atoi(tmp);
 	for(int i = 4; i >= 0; i--)
 	{
