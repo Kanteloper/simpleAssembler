@@ -153,15 +153,15 @@ int main(int argc, char** argv)
 		char* tmp_reg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		//printf("%s, %d\n", arg1, lc);
+		printf("%s, %d\n", arg1, lc);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
 		if(!rt_lb) // if arg1 label
 		{
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
-				if(strcmp(arg1, ".word") == 0) lc += 4; // if arg1 .word
+				if(strcmp(arg1, ".word") == 0) ; // if arg1 .word
 			}
-			if(strcmp(arg2, ".word") == 0) lc += 4; // if arg2 .word
+			if(strcmp(arg2, ".word") == 0) ; // if arg2 .word
 		}
 		else // if operator
 		{
@@ -395,12 +395,14 @@ int main(int argc, char** argv)
 						// ori
 						binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 8;
 					}
 					else // if lower 16bits 0x0000
 					{
 						// lui
 						binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc += 4;
 					}
 				}
 				else // error 
@@ -408,8 +410,8 @@ int main(int argc, char** argv)
 					binary = makeIformBinary("000000", "00000", "00000", OffsetToBin(0));
 					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 					fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
+					lc += 4;
 				}
-				lc += 4;
 			}
 		} // done operator found
 
