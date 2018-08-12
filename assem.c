@@ -72,8 +72,11 @@ int main(int argc, char** argv)
 	int j_key[2] = { 0x03, 0x02 };
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
-	int lc = 0; // location counter
-	int txt_cnt = 0; int data_cnt = 0; // number of text and data
+	int lc_data = 0; // location counter for data section
+	int lc = 0; // location counter for data section
+	int lc_text = 0; // location counter for text section
+	int txt_cnt = 0;
+	int data_cnt = 0; // number of text and data
 	HashTable* rOpTab; // operator table for R format instruction
 	HashTable* iOpTab; // operator table for I format instruction
 	HashTable* jOpTab; // operator table for J format instruction
@@ -113,27 +116,36 @@ int main(int argc, char** argv)
 		{
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
-				if(strcmp(arg1, ".word") == 0) // if arg1 .word
-				{
-					lc += 4;
+				label = strtok(arg1, ":");
+				if(strcmp(arg2, ".word") == 0 || strcmp(arg1, ".word") == 0) // if label in data section 
+				{	
+					printf("%s, %d\n", arg1, lc_data);
+					HashInsert(symTab, lc_data, label); // store label
+					lc_data += 4;
 					data_cnt++;
 				}
-				else
+				else // if label in text section
 				{
-					label = strtok(arg1, ":");
-					HashInsert(symTab, lc, label); // store label
+					printf("%s, %d\n", arg1, lc_text);
+					HashInsert(symTab, lc_text, label); // store label
 				}
-			}
-			if(strcmp(arg2, ".word") == 0) // if arg2 .word
-			{
-				lc += 4;
-				data_cnt++;
 			}
 		}
 		else // if operator
 		{
-			lc += 4;
-			txt_cnt++;
+			// if the lower 16bits address is not 0x0000
+			if(strcmp(arg1, "la") == 0 && getHashAddr(symTab, 0, arg3) != 0)
+			{
+				printf("%s, %d\n", arg1, lc_text);
+				lc_text += 8;
+				txt_cnt += 2;
+			}
+			else
+			{
+				printf("%s, %d\n", arg1, lc_text);
+				lc_text += 4;
+				txt_cnt++;
+			}
 		}
 
 		arg2[0] = '\0'; // flush arg2  
@@ -153,17 +165,9 @@ int main(int argc, char** argv)
 		char* tmp_reg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		printf("%s, %d\n", arg1, lc);
+		//printf("%s, %d\n", arg1, lc);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
-		if(!rt_lb) // if arg1 label
-		{
-			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
-			{
-				if(strcmp(arg1, ".word") == 0) ; // if arg1 .word
-			}
-			if(strcmp(arg2, ".word") == 0) ; // if arg2 .word
-		}
-		else // if operator
+		if(rt_lb) // if arg1 label
 		{
 			// search each opTab
 			if((idx = isRformat(rOpTab, r_key, arg1)) != -1) // if R format instruction
@@ -375,6 +379,8 @@ int main(int argc, char** argv)
 				switch(j_key[idx])
 				{
 					case 2: // j
+						// shift left twice address 26bits
+						// concatenate upper 4bits of current pc
 						lc += 4;
 						break;
 
