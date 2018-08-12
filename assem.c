@@ -397,6 +397,17 @@ int main(int argc, char** argv)
 						break;
 
 					case 3: // jal
+						if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+						{
+							binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						}
+						else // if not found
+						{
+							// error
+							binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
+							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						}
 						lc_text += 4;
 						break;
 				}
