@@ -119,6 +119,11 @@ int main(int argc, char** argv)
 				if(strcmp(arg2, ".word") == 0 || strcmp(arg1, ".word") == 0) // if label in data section 
 				{	
 					//printf("%s, %d\n", arg1, lc_data);
+					
+					//convert default value of data to binary 
+					//save those to another buffer
+					
+
 					HashInsert(symTab, lc_data, label); // store label
 					lc_data += 4;
 				}
@@ -165,6 +170,9 @@ int main(int argc, char** argv)
 		char* tmp;
 		char* tmp_immd;  
 		char* tmp_reg;
+		char* rs_arg;
+		char* rt_arg;
+		char* rd_arg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc_text);
@@ -178,11 +186,18 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
-						// only unsigned operations
-						binary = makeRformBinary("000000", "00000", RegToBin(arg3), RegToBin(arg2), 
-								RegToBin(arg4), "000000");  
+						// only unsigned operation 
+						rs_arg = RegToBin(arg3);
+						rt_arg = RegToBin(arg2);
+						rd_arg = RegToBin(arg4);
+						binary = makeRformBinary("000000", "00000", rs_arg, rt_arg, 
+								rd_arg, "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
+						free(rs_arg);
+						free(rt_arg);
+						free(rd_arg);
+						free(binary);
 						break;
 
 					case 2: // srl
@@ -191,6 +206,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), RegToBin(arg4), "000010");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 8: // jr
@@ -198,6 +214,7 @@ int main(int argc, char** argv)
 								"00000", "001000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 33: // addu
@@ -206,6 +223,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "100001");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 35: // subu
@@ -214,6 +232,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "100011");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 36: // and
@@ -221,6 +240,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "100100");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 37: // or
@@ -228,6 +248,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "100101");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 39: // nor
@@ -235,6 +256,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "100111");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 43: // sltu
@@ -243,6 +265,7 @@ int main(int argc, char** argv)
 								RegToBin(arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 				}
 			} // r format opTab search end
@@ -269,6 +292,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 5: // bne
 						//immediate field are sign extended to allow negative
@@ -285,6 +309,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 9: // addiu
 						// only unsigned operations
@@ -300,6 +325,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 11: // sltiu
 						// only unsigned operations
@@ -315,6 +341,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 12: // andi
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
@@ -329,6 +356,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 13: // ori
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
@@ -343,6 +371,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 15: // lui
 						if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
@@ -357,6 +386,7 @@ int main(int argc, char** argv)
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 35: // lw
 						//immediate field are sign extended to allow negative
@@ -365,6 +395,7 @@ int main(int argc, char** argv)
 						binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
@@ -373,6 +404,7 @@ int main(int argc, char** argv)
 						binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 						break;
 				}
 			} // i format table search end
@@ -394,6 +426,7 @@ int main(int argc, char** argv)
 							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
 						}
 						lc_text += 4;
+						free(binary);
 						break;
 
 					case 3: // jal
@@ -409,6 +442,7 @@ int main(int argc, char** argv)
 							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
 						}
 						lc_text += 4;
+						free(binary);
 						break;
 				}
 			} // j format table search end
@@ -425,6 +459,7 @@ int main(int argc, char** argv)
 						binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 8;
+						free(binary);
 					}
 					else // if lower 16bits 0x0000
 					{
@@ -432,6 +467,7 @@ int main(int argc, char** argv)
 						binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
+						free(binary);
 					}
 				}
 				else // error 
@@ -440,6 +476,7 @@ int main(int argc, char** argv)
 					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 					fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
 					lc_text += 4;
+					free(binary);
 				}
 			}
 		} // done operator found
@@ -447,12 +484,11 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	} // while end
 
+
+	// append to default data value  buffer
+
 	puts(buffer);
 
-	// convert text section size to binary
-	// convert data section size to binary
-	// convert initialized data value to binary
-	// append to buffer
 	// output object file
 
 	fclose(fp);
