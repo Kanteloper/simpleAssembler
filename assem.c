@@ -265,7 +265,7 @@ int main(int argc, char** argv)
 							 */
 							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3),
 									OffsetToBin(0));
-							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg4);
+							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
@@ -281,7 +281,7 @@ int main(int argc, char** argv)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
 									OffsetToBin(0));
-							fprintf(stderr, "There is no match in symbol table: %s\n", arg4);
+							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
@@ -378,11 +378,21 @@ int main(int argc, char** argv)
 			} // i format table search end
 			else if((idx = isJformat(jOpTab, j_key, arg1)) != -1) // if I format instruction 
 			{
+				int address = 0;
 				switch(j_key[idx])
 				{
 					case 2: // j
-						// shift left twice address 26bits
-						// concatenate upper 4bits of current pc
+						if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+						{
+							binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						}
+						else // if not found
+						{
+							// error
+							binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
+							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						}
 						lc_text += 4;
 						break;
 
