@@ -51,6 +51,7 @@ void set_jOpTab(HashTable* ot);
 char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
 char* makeIformBinary(char* op, char* rs, char* rt, char* immd);
 char* OffsetToBin(int arg);
+char* SizeToBin(int arg);
 int isRformat(HashTable* ht, int* rk, char* arg);
 int isIformat(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
@@ -73,15 +74,13 @@ int main(int argc, char** argv)
 	regex_t rg_lb; // pointer for label regex
 	int rt_lb; // regcomp return value for label
 	int lc_data = 0; // location counter for data section
-	int lc = 0; // location counter for data section
 	int lc_text = 0; // location counter for text section
-	int txt_cnt = 0;
-	int data_cnt = 0; // number of text and data
 	HashTable* rOpTab; // operator table for R format instruction
 	HashTable* iOpTab; // operator table for I format instruction
 	HashTable* jOpTab; // operator table for J format instruction
 	HashTable* symTab; // symbol table
 	char buffer[BUF_MAX] = {}; // buffer for file output
+	char* binary; // for binary code
 
 	// check parameter
 	if(argc < 2) 
@@ -119,14 +118,13 @@ int main(int argc, char** argv)
 				label = strtok(arg1, ":");
 				if(strcmp(arg2, ".word") == 0 || strcmp(arg1, ".word") == 0) // if label in data section 
 				{	
-					printf("%s, %d\n", arg1, lc_data);
+					//printf("%s, %d\n", arg1, lc_data);
 					HashInsert(symTab, lc_data, label); // store label
 					lc_data += 4;
-					data_cnt++;
 				}
 				else // if label in text section
 				{
-					printf("%s, %d\n", arg1, lc_text);
+					//printf("%s, %d\n", arg1, lc_text);
 					HashInsert(symTab, lc_text, label); // store label
 				}
 			}
@@ -136,36 +134,40 @@ int main(int argc, char** argv)
 			// if the lower 16bits address is not 0x0000
 			if(strcmp(arg1, "la") == 0 && getHashAddr(symTab, 0, arg3) != 0)
 			{
-				printf("%s, %d\n", arg1, lc_text);
+				//printf("%s, %d\n", arg1, lc_text);
 				lc_text += 8;
-				txt_cnt += 2;
 			}
 			else
 			{
-				printf("%s, %d\n", arg1, lc_text);
+				//printf("%s, %d\n", arg1, lc_text);
 				lc_text += 4;
-				txt_cnt++;
 			}
 		}
 
 		arg2[0] = '\0'; // flush arg2  
 	}
 
+	// convert data and text section size to binary
+	// And, save those to buffer
+	binary = SizeToBin(lc_text);
+	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+	binary = SizeToBin(lc_data);
+	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
-	lc = 0; // reset location counter
+	lc_text = 0; // reset location counter
 
 	// start second pass
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		int idx = -1;
-		char* binary; // for binary code
 		int b_target; // address of branch target
 		char* tmp;
 		char* tmp_immd;  
 		char* tmp_reg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		//printf("%s, %d\n", arg1, lc);
+		//printf("%s, %d\n", arg1, lc_text);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
 		if(rt_lb) // if arg1 label
 		{
@@ -180,7 +182,7 @@ int main(int argc, char** argv)
 						binary = makeRformBinary("000000", "00000", RegToBin(arg3), RegToBin(arg2), 
 								RegToBin(arg4), "000000");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 2: // srl
@@ -188,14 +190,14 @@ int main(int argc, char** argv)
 						binary = makeRformBinary("000000", "00000", RegToBin(arg3),
 								RegToBin(arg2), RegToBin(arg4), "000010");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 8: // jr
 						binary = makeRformBinary("000000", RegToBin(arg2), "00000", "00000",
 								"00000", "001000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 33: // addu
@@ -203,7 +205,7 @@ int main(int argc, char** argv)
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100001");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 35: // subu
@@ -211,28 +213,28 @@ int main(int argc, char** argv)
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100011");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 36: // and
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100100");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 37: // or
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100101");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 39: // nor
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "100111");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 43: // sltu
@@ -240,7 +242,7 @@ int main(int argc, char** argv)
 						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
 								RegToBin(arg2), "00000", "101011");  
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 				}
 			} // r format opTab search end
@@ -254,7 +256,7 @@ int main(int argc, char** argv)
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
 							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else // if not found
 						{
@@ -266,14 +268,14 @@ int main(int argc, char** argv)
 							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg4);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 5: // bne
 						//immediate field are sign extended to allow negative
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
 						{
 							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else  
 						{
@@ -282,14 +284,14 @@ int main(int argc, char** argv)
 							fprintf(stderr, "There is no match in symbol table: %s\n", arg4);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 9: // addiu
 						// only unsigned operations
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else // if constant
 						{
@@ -297,14 +299,14 @@ int main(int argc, char** argv)
 									OffsetToBin(strToInt(arg4)));
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 11: // sltiu
 						// only unsigned operations
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else
 						{
@@ -312,13 +314,13 @@ int main(int argc, char** argv)
 									OffsetToBin(strToInt(arg4)));
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 12: // andi
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else 
 						{
@@ -326,13 +328,13 @@ int main(int argc, char** argv)
 									OffsetToBin(strToInt(arg4)));
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 13: // ori
 						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
 						{
 							binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else 
 						{
@@ -340,13 +342,13 @@ int main(int argc, char** argv)
 									OffsetToBin(strToInt(arg4)));
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 15: // lui
 						if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
 						{
 							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									OffsetToBin((b_target - lc - 4) / 4));
+									OffsetToBin((b_target - lc_text - 4) / 4));
 						}
 						else 
 						{
@@ -354,7 +356,7 @@ int main(int argc, char** argv)
 									OffsetToBin(strToInt(arg3)));
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 35: // lw
 						//immediate field are sign extended to allow negative
@@ -362,7 +364,7 @@ int main(int argc, char** argv)
 						tmp_reg = getRegister(arg3); // filter arg3 for register
 						binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
@@ -370,7 +372,7 @@ int main(int argc, char** argv)
 						tmp_reg = getRegister(arg3); // filter arg3 for register
 						binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 						break;
 				}
 			} // i format table search end
@@ -381,11 +383,11 @@ int main(int argc, char** argv)
 					case 2: // j
 						// shift left twice address 26bits
 						// concatenate upper 4bits of current pc
-						lc += 4;
+						lc_text += 4;
 						break;
 
 					case 3: // jal
-						lc += 4;
+						lc_text += 4;
 						break;
 				}
 			} // j format table search end
@@ -401,14 +403,14 @@ int main(int argc, char** argv)
 						// ori
 						binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 8;
+						lc_text += 8;
 					}
 					else // if lower 16bits 0x0000
 					{
 						// lui
 						binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc += 4;
+						lc_text += 4;
 					}
 				}
 				else // error 
@@ -416,7 +418,7 @@ int main(int argc, char** argv)
 					binary = makeIformBinary("000000", "00000", "00000", OffsetToBin(0));
 					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 					fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
-					lc += 4;
+					lc_text += 4;
 				}
 			}
 		} // done operator found
@@ -603,6 +605,7 @@ int strToInt(char* arg)
 
 /**
  * @brief return integer input to string represented binary 
+ *		  for offset
  * @param int $tl target location counter
  * @return void
  */
@@ -615,6 +618,24 @@ char* OffsetToBin(int arg)
 		arg >>= 1;
 	}
 	tmp[16] = '\0';
+	return tmp;
+}
+
+/**
+ * @brief return integer input to string represented binary 
+ *		  for the size of data and text section
+ * @param int $tl target location counter
+ * @return void
+ */
+char* SizeToBin(int arg)
+{
+	char* tmp = (char*)malloc(sizeof(char) * 33);
+	for(int i = 31; i >= 0; i--)
+	{
+		tmp[i] = (arg & 1) + '0'; 
+		arg >>= 1;
+	}
+	tmp[32] = '\0';
 	return tmp;
 }
 
