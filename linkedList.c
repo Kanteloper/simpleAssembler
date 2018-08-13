@@ -88,6 +88,7 @@ void freeLinkedList(List* pl)
 	{
 		tmp = pl->head;
 		pl->head = pl->head->next;
+		free(tmp->data.value);
 		free(tmp);
 	}
 	free(pl);
