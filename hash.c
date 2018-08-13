@@ -30,6 +30,7 @@ HashTable* createTable(int size, HashFunc* f)
 
 	// register hash function
 	hTable->hf = f;
+
 	return hTable;
 }
 
@@ -112,4 +113,17 @@ int getHashAddr(HashTable* ht, int hk, char* oprn)
 		return addr;
 	}
 	return -1;
+}
+
+/**
+ * @brief free hash table list
+ * @param int $size
+ * @param List** $hlist
+ */
+void freeHashList(int size, List** hlist)
+{
+	for( int i = 0; i < size; i++ )
+		freeLinkedList(hlist[i]);
+
+	free(hlist);
 }

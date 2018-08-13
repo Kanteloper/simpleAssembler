@@ -77,4 +77,20 @@ void insertList(List* pl, Data nd)
 	}
 }
 
+/**
+ * @brief free linkedlist Node
+ * @param List* $pl
+ */
+void freeLinkedList(List* pl)
+{
+	Node* tmp;
+	while(pl->head != NULL)
+	{
+		tmp = pl->head;
+		pl->head = pl->head->next;
+		free(tmp);
+	}
+	free(pl);
+}
+
 

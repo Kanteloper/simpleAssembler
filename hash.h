@@ -20,5 +20,6 @@ void HashInsert(HashTable* ht, Key k, Value v);
 Value HashSearch(HashTable* ht, Key k, Value v);
 bool isDuplicated(HashTable* ht, Key k, Value v);
 int getHashAddr(HashTable* ht, int hk, char* oprn);
+void freeHashList(int size, List** hlist);
 
 #endif

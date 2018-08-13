@@ -23,5 +23,6 @@ List* initList();
 Value searchList(List* pl, Value v);
 void insertList(List* pl, Data nd);
 int getAddr(List* pl, char* oprn);
+void freeLinkedList(List* pl);
 
 #endif

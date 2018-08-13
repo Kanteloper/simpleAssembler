@@ -517,6 +517,7 @@ int main(int argc, char** argv)
 
 	fclose(fp);
 	regfree(&rg_lb);
+	freeHashList(TB_MAX, rOpTab->list);
 	free(rOpTab);
 	free(iOpTab);
 	free(jOpTab);
