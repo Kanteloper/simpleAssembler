@@ -254,47 +254,72 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 
-						//case 35: // subu
+					case 35: // subu
 						//// only unsigned operations
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "100011");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc_text += 4;
-						//free(binary);
-						//break;
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 35;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc_text += 4;
+						free(binary);
+						break;
 
-						//case 36: // and
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "100100");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc_text += 4;
-						//free(binary);
-						//break;
+					case 36: // and
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 36;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc_text += 4;
+						free(binary);
+						break;
 
-						//case 37: // or
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "100101");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc_text += 4;
-						//free(binary);
-						//break;
+					case 37: // or
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 37;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc_text += 4;
+						free(binary);
+						break;
 
-						//case 39: // nor
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "100111");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc_text += 4;
-						//free(binary);
-						//break;
+					case 39: // nor
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 39;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc_text += 4;
+						free(binary);
+						break;
 
-						//case 43: // sltu
-						//// only unsigned operations
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "101011");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//lc_text += 4;
-						//free(binary);
-						//break;
+					case 43: // sltu
+						// only unsigned operations
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 43;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						lc_text += 4;
+						free(binary);
+						break;
 				}
 			} // r format opTab search end
 			//else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
