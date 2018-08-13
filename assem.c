@@ -18,14 +18,25 @@
 #define STR_MAX 20
 #define BUF_MAX 1000 
 
+//typedef struct _r_struct
+//{
+	//char op[7];
+	//char rs[6];
+	//char rt[6];
+	//char rd[6];
+	//char shamt[6];
+	//char funct[7];
+//} format_R;
+
+
 typedef struct _r_struct
 {
-	char op[7];
-	char rs[6];
-	char rt[6];
-	char rd[6];
-	char shamt[6];
-	char funct[7];
+	unsigned int op;
+	unsigned int rs;
+	unsigned int rt;
+	unsigned int rd;
+	unsigned int shamt;
+	unsigned int funct;
 } format_R;
 
 typedef struct _i_struct
@@ -44,11 +55,13 @@ typedef struct _j_struct
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-char* RegToBin(char* arg);
+//char* RegToBin(char* arg);
+int RegToBin(char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
-char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
+//char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
+char* makeRformBinary(format_R* fr);
 char* makeIformBinary(char* op, char* rs, char* rt, char* immd);
 char* OffsetToBin(int arg);
 char* SizeToBin(int arg);
@@ -156,8 +169,10 @@ int main(int argc, char** argv)
 	// And, save those to buffer
 	binary = SizeToBin(lc_text);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+	free(binary);
 	binary = SizeToBin(lc_data);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+	free(binary);
 
 	fseek(fp, 0L, SEEK_SET); // reset file pointer 
 	lc_text = 0; // reset location counter
@@ -166,13 +181,15 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		int idx = -1;
-		int b_target; // address of branch target
-		char* tmp;
-		char* tmp_immd;  
-		char* tmp_reg;
-		char* rs_arg;
-		char* rt_arg;
-		char* rd_arg;
+		format_R fr;
+
+		//int b_target; // address of branch target
+		//char* tmp;
+		//char* tmp_immd;  
+		//char* tmp_reg;
+		//char* rs_arg;
+		//char* rt_arg;
+		//char* rd_arg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc_text);
@@ -186,299 +203,306 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
+						fr.op = 0;
+						fr.rs = 0;
+						fr.rt = RegToBin(arg3);
+						fr.rd = RegToBin(arg2);
+						fr.shamt = RegToBin(arg4);
+						fr.funct = 0;
+						binary = makeRformBinary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						lc_text += 4;
 						// only unsigned operation 
-						rs_arg = RegToBin(arg3);
-						rt_arg = RegToBin(arg2);
-						rd_arg = RegToBin(arg4);
-						binary = makeRformBinary("000000", "00000", rs_arg, rt_arg, 
-								rd_arg, "000000");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc_text += 4;
-						free(rs_arg);
-						free(rt_arg);
-						free(rd_arg);
-						free(binary);
+						//rs_arg = RegToBin(arg3);
+						//rt_arg = RegToBin(arg2);
+						//rd_arg = RegToBin(arg4);
+						//binary = makeRformBinary("000000", "00000", rs_arg, rt_arg, 
+						//rd_arg, "000000");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc_text += 4;
+						//free(rs_arg);
+						//free(rt_arg);
+						//free(rd_arg);
+						//free(binary);
 						break;
 
-					case 2: // srl
-						// only unsigned operations
-						binary = makeRformBinary("000000", "00000", RegToBin(arg3),
-								RegToBin(arg2), RegToBin(arg4), "000010");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 2: // srl
+						//// only unsigned operations
+						//binary = makeRformBinary("000000", "00000", RegToBin(arg3),
+						//RegToBin(arg2), RegToBin(arg4), "000010");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc_text += 4;
 
-					case 8: // jr
-						binary = makeRformBinary("000000", RegToBin(arg2), "00000", "00000",
-								"00000", "001000");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 8: // jr
+						//binary = makeRformBinary("000000", RegToBin(arg2), "00000", "00000",
+						//"00000", "001000");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 33: // addu
-						// only unsigned operations
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "100001");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 33: // addu
+						//// only unsigned operations
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "100001");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 35: // subu
-						// only unsigned operations
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "100011");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 35: // subu
+						//// only unsigned operations
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "100011");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 36: // and
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "100100");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 36: // and
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "100100");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 37: // or
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "100101");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 37: // or
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "100101");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 39: // nor
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "100111");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 39: // nor
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "100111");
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
+						//lc_text += 4;
+						//free(binary);
+						//break;
 
-					case 43: // sltu
-						// only unsigned operations
-						binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-								RegToBin(arg2), "00000", "101011");  
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
+						//case 43: // sltu
+						//// only unsigned operations
+						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
+						//RegToBin(arg2), "00000", "101011");  
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//lc_text += 4;
+						//free(binary);
+						//break;
 				}
 			} // r format opTab search end
-			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
-			{
-				switch(i_key[idx])
-				{
-					case 4: // beq
-						//immediate field are sign extended to allow negative
-						// search symbol as operand
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
-						{
-							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else // if not found
-						{
-							/* error handling when there is no matched operand in symbol table 
-							 * set 0 as address of operand & alert error flag to user
-							 */
-							binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3),
-									OffsetToBin(0));
-							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 5: // bne
-						//immediate field are sign extended to allow negative
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
-						{
-							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else  
-						{
-							binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
-									OffsetToBin(0));
-							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 9: // addiu
-						// only unsigned operations
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
-						{
-							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else // if constant
-						{
-							binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin(strToInt(arg4)));
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 11: // sltiu
-						// only unsigned operations
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
-						{
-							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else
-						{
-							binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin(strToInt(arg4)));
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 12: // andi
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
-						{
-							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else 
-						{
-							binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin(strToInt(arg4)));
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 13: // ori
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
-						{
-							binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else 
-						{
-							binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
-									OffsetToBin(strToInt(arg4)));
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 15: // lui
-						if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
-						{
-							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									OffsetToBin((b_target - lc_text - 4) / 4));
-						}
-						else 
-						{
-							binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									OffsetToBin(strToInt(arg3)));
-						}
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 35: // lw
-						//immediate field are sign extended to allow negative
-						tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
-						tmp_reg = getRegister(arg3); // filter arg3 for register
-						binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-					case 43: // sw
-						//immediate field are sign extended to allow negative
-						tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
-						tmp_reg = getRegister(arg3); // filter arg3 for register
-						binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-						break;
-				}
-			} // i format table search end
-			else if((idx = isJformat(jOpTab, j_key, arg1)) != -1) // if I format instruction 
-			{
-				int address = 0;
-				switch(j_key[idx])
-				{
-					case 2: // j
-						if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
-						{
-							binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
-							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						}
-						else // if not found
-						{
-							// error
-							binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
-							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
-						}
-						lc_text += 4;
-						free(binary);
-						break;
+			//else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
+			//{
+				//switch(i_key[idx])
+				//{
+					////case 4: // beq
+					//////immediate field are sign extended to allow negative
+					////// search symbol as operand
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
+					////{
+					////binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else // if not found
+					////{
+					/////* error handling when there is no matched operand in symbol table 
+					////* set 0 as address of operand & alert error flag to user
+					////*/
+					////binary = makeIformBinary("000100", RegToBin(arg2), RegToBin(arg3),
+					////OffsetToBin(0));
+					////fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 5: // bne
+					//////immediate field are sign extended to allow negative
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
+					////{
+					////binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else  
+					////{
+					////binary = makeIformBinary("000101", RegToBin(arg2), RegToBin(arg3), 
+					////OffsetToBin(0));
+					////fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 9: // addiu
+					////// only unsigned operations
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+					////{
+					////binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else // if constant
+					////{
+					////binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin(strToInt(arg4)));
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 11: // sltiu
+					////// only unsigned operations
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+					////{
+					////binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else
+					////{
+					////binary = makeIformBinary("001011", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin(strToInt(arg4)));
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 12: // andi
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+					////{
+					////binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else 
+					////{
+					////binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin(strToInt(arg4)));
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 13: // ori
+					////if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+					////{
+					////binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else 
+					////{
+					////binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
+					////OffsetToBin(strToInt(arg4)));
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 15: // lui
+					////if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
+					////{
+					////binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
+					////OffsetToBin((b_target - lc_text - 4) / 4));
+					////}
+					////else 
+					////{
+					////binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
+					////OffsetToBin(strToInt(arg3)));
+					////}
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 35: // lw
+					//////immediate field are sign extended to allow negative
+					////tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
+					////tmp_reg = getRegister(arg3); // filter arg3 for register
+					////binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+					////case 43: // sw
+					//////immediate field are sign extended to allow negative
+					////tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
+					////tmp_reg = getRegister(arg3); // filter arg3 for register
+					////binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+					////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					////lc_text += 4;
+					////free(binary);
+					////break;
+				//}
+			//} // i format table search end
+			//else if((idx = isJformat(jOpTab, j_key, arg1)) != -1) // if I format instruction 
+			//{
+				////int address = 0;
+				////switch(j_key[idx])
+				////{
+				////case 2: // j
+				////if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+				////{
+				////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////}
+				////else // if not found
+				////{
+				////// error
+				////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
+				////fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+				////}
+				////lc_text += 4;
+				////free(binary);
+				////break;
 
-					case 3: // jal
-						if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
-						{
-							binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
-							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						}
-						else // if not found
-						{
-							// error
-							binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
-							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
-						}
-						lc_text += 4;
-						free(binary);
-						break;
-				}
-			} // j format table search end
-			else // la
-			{
-				if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) // if operand is symbol
-				{
-					if(b_target != 0) // if lower 16bits not 0x0000
-					{
-						// lui
-						binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						// ori
-						binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 8;
-						free(binary);
-					}
-					else // if lower 16bits 0x0000
-					{
-						// lui
-						binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						lc_text += 4;
-						free(binary);
-					}
-				}
-				else // error 
-				{
-					binary = makeIformBinary("000000", "00000", "00000", OffsetToBin(0));
-					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
-					lc_text += 4;
-					free(binary);
-				}
-			}
+				////case 3: // jal
+				////if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+				////{
+				////binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////}
+				////else // if not found
+				////{
+				////// error
+				////binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
+				////fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+				////}
+				////lc_text += 4;
+				////free(binary);
+				////break;
+				////}
+			//} // j format table search end
+			//else // la
+			//{
+				////if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) // if operand is symbol
+				////{
+				////if(b_target != 0) // if lower 16bits not 0x0000
+				////{
+				////// lui
+				////binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////// ori
+				////binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////lc_text += 8;
+				////free(binary);
+				////}
+				////else // if lower 16bits 0x0000
+				////{
+				////// lui
+				////binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////lc_text += 4;
+				////free(binary);
+				////}
+				////}
+				////else // error 
+				////{
+				////binary = makeIformBinary("000000", "00000", "00000", OffsetToBin(0));
+				////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+				////fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
+				////lc_text += 4;
+				////free(binary);
+				////}
+			//}
 		} // done operator found
 
 		arg2[0] = '\0'; // flush arg2  
@@ -487,7 +511,7 @@ int main(int argc, char** argv)
 
 	// append to default data value  buffer
 
-	puts(buffer);
+	//puts(buffer);
 
 	// output object file
 
@@ -537,22 +561,36 @@ char* getImmediate(char* arg)
  * @param char* $func 
  * @return char*
  */
-char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func)
+//char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func)
+//{
+	//format_R fr; // structure for format R instruction
+	//char* bin = (char*)malloc(sizeof(char) * 33);
+	//strncpy(fr.op, op, 7);
+	//strncpy(bin, fr.op, 7);
+	//strncpy(fr.rs, rs, 6);
+	//strncat(bin, fr.rs, (strlen(bin) + strlen(fr.rs) + 1));
+	//strncpy(fr.rt, rt, 6);
+	//strncat(bin, fr.rt, (strlen(bin) + strlen(fr.rt) + 1));
+	//strncpy(fr.rd, rd, 6);
+	//strncat(bin, fr.rd, (strlen(bin) + strlen(fr.rd) + 1));
+	//strncpy(fr.shamt, shamt, 6);
+	//strncat(bin, fr.shamt, (strlen(bin) + strlen(fr.shamt) + 1));
+	//strncpy(fr.funct, func, 7);
+	//strncat(bin, fr.funct, (strlen(bin) + strlen(fr.funct) + 1));
+	//return bin;
+//}
+
+char* makeRformBinary(format_R* fr)
 {
-	format_R fr; // structure for format R instruction
 	char* bin = (char*)malloc(sizeof(char) * 33);
-	strncpy(fr.op, op, 7);
-	strncpy(bin, fr.op, 7);
-	strncpy(fr.rs, rs, 6);
-	strncat(bin, fr.rs, (strlen(bin) + strlen(fr.rs) + 1));
-	strncpy(fr.rt, rt, 6);
-	strncat(bin, fr.rt, (strlen(bin) + strlen(fr.rt) + 1));
-	strncpy(fr.rd, rd, 6);
-	strncat(bin, fr.rd, (strlen(bin) + strlen(fr.rd) + 1));
-	strncpy(fr.shamt, shamt, 6);
-	strncat(bin, fr.shamt, (strlen(bin) + strlen(fr.shamt) + 1));
-	strncpy(fr.funct, func, 7);
-	strncat(bin, fr.funct, (strlen(bin) + strlen(fr.funct) + 1));
+	unsigned int tmp = fr->op << 26 | fr->rs << 21 | fr->rt << 16 |
+				fr->rd << 11 | fr->shamt << 6 | fr->funct;
+	for(int i = 31; i >= 0; i--)
+	{
+		bin[i] = (tmp & 1) + '0'; 
+		tmp >>= 1;
+	}
+	bin[32] = '\0';
 	return bin;
 }
 
@@ -703,24 +741,33 @@ char* SizeToBin(int arg)
  * @param char* $arg
  * @return char*
  */
-char* RegToBin(char* arg)
+//char* RegToBin(char* arg)
+//{
+	//int nReg = 0;
+	//char* bin = (char*)malloc(sizeof(char) * 6);
+	//char* tmp = (char*)malloc(sizeof(char) * 5);
+
+	//strcpy(tmp, arg);
+	//tmp = strtok(tmp, "$");
+	//tmp = strtok(tmp, ",");
+	//tmp = strtok(tmp, ")");
+	//nReg = atoi(tmp);
+	//for(int i = 4; i >= 0; i--)
+	//{
+		//bin[i] = (nReg & 1) + '0'; 
+		//nReg >>= 1;
+	//}
+	//bin[5] = '\0';
+	//return bin;
+//}
+int RegToBin(char* arg)
 {
 	int nReg = 0;
-	char* bin = (char*)malloc(sizeof(char) * 6);
-	char* tmp = (char*)malloc(sizeof(char) * 5);
-
-	strcpy(tmp, arg);
-	tmp = strtok(tmp, "$");
-	tmp = strtok(tmp, ",");
-	tmp = strtok(tmp, ")");
-	nReg = atoi(tmp);
-	for(int i = 4; i >= 0; i--)
-	{
-		bin[i] = (nReg & 1) + '0'; 
-		nReg >>= 1;
-	}
-	bin[5] = '\0';
-	return bin;
+	arg = strtok(arg, "$");
+	arg = strtok(arg, ",");
+	arg = strtok(arg, ")");
+	nReg = atoi(arg);
+	return nReg;
 }
 /**
  * @brief hash function for symbol table 
