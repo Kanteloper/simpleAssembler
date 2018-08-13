@@ -55,13 +55,11 @@ typedef struct _j_struct
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-//char* RegToBin(char* arg);
-int RegToBin(char* arg);
+int convert_to_int(char* arg);
 void set_rOpTab(HashTable* ot);
 void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
-//char* makeRformBinary(char* op, char* rs, char* rt, char* rd, char* shamt, char* func);
-char* makeRformBinary(format_R* fr);
+char* make_r_format_binary(format_R* fr);
 char* makeIformBinary(char* op, char* rs, char* rt, char* immd);
 char* OffsetToBin(int arg);
 char* SizeToBin(int arg);
@@ -94,6 +92,9 @@ int main(int argc, char** argv)
 	HashTable* symTab; // symbol table
 	char buffer[BUF_MAX] = {}; // buffer for file output
 	char* binary; // for binary code
+	format_R fr;
+	format_I fi;
+	format_J fj;
 
 	// check parameter
 	if(argc < 2) 
@@ -181,15 +182,11 @@ int main(int argc, char** argv)
 	while(fgets(line, LINE_MAX, fp) != NULL) 
 	{
 		int idx = -1;
-		format_R fr;
 
 		//int b_target; // address of branch target
 		//char* tmp;
 		//char* tmp_immd;  
 		//char* tmp_reg;
-		//char* rs_arg;
-		//char* rt_arg;
-		//char* rd_arg;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc_text);
@@ -203,35 +200,34 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
+						// only unsigned operations
 						fr.op = 0;
 						fr.rs = 0;
-						fr.rt = RegToBin(arg3);
-						fr.rd = RegToBin(arg2);
-						fr.shamt = RegToBin(arg4);
+						fr.rt = convert_to_int(arg3);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = convert_to_int(arg4);
 						fr.funct = 0;
-						binary = makeRformBinary(&fr);
+						binary = make_r_format_binary(&fr);
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						lc_text += 4;
-						// only unsigned operation 
-						//rs_arg = RegToBin(arg3);
-						//rt_arg = RegToBin(arg2);
-						//rd_arg = RegToBin(arg4);
-						//binary = makeRformBinary("000000", "00000", rs_arg, rt_arg, 
-						//rd_arg, "000000");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
-						//lc_text += 4;
-						//free(rs_arg);
-						//free(rt_arg);
-						//free(rd_arg);
-						//free(binary);
+						free(binary);
 						break;
 
-						//case 2: // srl
-						//// only unsigned operations
+					case 2: // srl
+						// only unsigned operations
+						fr.op = 0;
+						fr.rs = 0;
+						fr.rt = convert_to_int(arg3);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = convert_to_int(arg4);
+						fr.funct = 0;
+						binary = make_r_format_binary(&fr);
 						//binary = makeRformBinary("000000", "00000", RegToBin(arg3),
 						//RegToBin(arg2), RegToBin(arg4), "000010");  
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 						//lc_text += 4;
+						free(binary);
+						break;
 
 						//case 8: // jr
 						//binary = makeRformBinary("000000", RegToBin(arg2), "00000", "00000",
@@ -511,17 +507,20 @@ int main(int argc, char** argv)
 
 	// append to default data value  buffer
 
-	//puts(buffer);
+	puts(buffer);
 
 	// output object file
 
 	fclose(fp);
-	regfree(&rg_lb);
-	freeHashList(TB_MAX, rOpTab->list);
-	free(rOpTab);
+	regfree(&rg_lb); // free regex
+	freeHashList(TB_MAX, rOpTab->list); // free linkedList in rOpTab
+	free(rOpTab); // free rOpTab HashTable
+	freeHashList(TB_MAX, iOpTab->list); // free linkedList in iOpTab
 	free(iOpTab);
+	freeHashList(TB_MAX, jOpTab->list); // free linkedList in jOpTab
 	free(jOpTab);
-	free(symTab);
+	freeHashList(TB_MAX, symTab->list); // free linkedList in symTab
+	free(symTab); // free symTab HashTable
 	return 0;
 }
 
@@ -581,7 +580,7 @@ char* getImmediate(char* arg)
 	//return bin;
 //}
 
-char* makeRformBinary(format_R* fr)
+char* make_r_format_binary(format_R* fr)
 {
 	char* bin = (char*)malloc(sizeof(char) * 33);
 	unsigned int tmp = fr->op << 26 | fr->rs << 21 | fr->rt << 16 |
@@ -740,28 +739,9 @@ char* SizeToBin(int arg)
  * @brief convert register number to binary
  * @param char** $rg_array for binary value of register
  * @param char* $arg
- * @return char*
+ * @return int
  */
-//char* RegToBin(char* arg)
-//{
-	//int nReg = 0;
-	//char* bin = (char*)malloc(sizeof(char) * 6);
-	//char* tmp = (char*)malloc(sizeof(char) * 5);
-
-	//strcpy(tmp, arg);
-	//tmp = strtok(tmp, "$");
-	//tmp = strtok(tmp, ",");
-	//tmp = strtok(tmp, ")");
-	//nReg = atoi(tmp);
-	//for(int i = 4; i >= 0; i--)
-	//{
-		//bin[i] = (nReg & 1) + '0'; 
-		//nReg >>= 1;
-	//}
-	//bin[5] = '\0';
-	//return bin;
-//}
-int RegToBin(char* arg)
+int convert_to_int(char* arg)
 {
 	int nReg = 0;
 	arg = strtok(arg, "$");
@@ -770,6 +750,7 @@ int RegToBin(char* arg)
 	nReg = atoi(arg);
 	return nReg;
 }
+
 /**
  * @brief hash function for symbol table 
  * @param int $k location counter 
