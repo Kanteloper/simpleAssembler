@@ -241,10 +241,15 @@ int main(int argc, char** argv)
 						break;
 
 					case 33: // addu
-						//// only unsigned operations
-						//binary = makeRformBinary("000000", RegToBin(arg3), RegToBin(arg4),
-						//RegToBin(arg2), "00000", "100001");  
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						// only unsigned operations
+						fr.op = 0;
+						fr.rs = convert_to_int(arg3);
+						fr.rt = convert_to_int(arg4);
+						fr.rd = convert_to_int(arg2);
+						fr.shamt = 0;
+						fr.funct = 33;
+						binary = make_r_format_binary(&fr);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
 						free(binary);
 						break;
