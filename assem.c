@@ -44,13 +44,13 @@ typedef struct _j_struct
 
 int symHashFunc(Key k);
 int opHashFunc(Key k);
-int convert_to_int(char* arg);
-void set_rOpTab(HashTable* ot);
-void set_iOpTab(HashTable* ot);
-void set_jOpTab(HashTable* ot);
+int convert_str_to_int(char* arg);
+void set_R_optab(HashTable* ot);
+void set_I_optab(HashTable* ot);
+void set_J_optab(HashTable* ot);
 char* make_r_format_binary(format_R* fr);
 char* make_i_format_binary(format_I* fi);
-char* SizeToBin(int arg);
+char* convert_size_to_bin(int arg);
 int is_R_format(HashTable* ht, int* rk, char* arg);
 int is_I_format(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
@@ -102,9 +102,9 @@ int main(int argc, char** argv)
 	rt_lb = regcomp(&rg_lb, "[:.]", 0); 
 
 	// set predefined operator table
-	rOpTab = createTable(TB_MAX, opHashFunc); set_rOpTab(rOpTab);
-	iOpTab = createTable(TB_MAX, opHashFunc); set_iOpTab(iOpTab);
-	jOpTab = createTable(TB_MAX, opHashFunc); set_jOpTab(jOpTab);
+	rOpTab = createTable(TB_MAX, opHashFunc); set_R_optab(rOpTab);
+	iOpTab = createTable(TB_MAX, opHashFunc); set_I_optab(iOpTab);
+	jOpTab = createTable(TB_MAX, opHashFunc); set_J_optab(jOpTab);
 	symTab = createTable(TB_MAX, symHashFunc); // create symbol table
 
 	// start first pass	
@@ -156,10 +156,10 @@ int main(int argc, char** argv)
 
 	// convert data and text section size to binary
 	// And, save those to buffer
-	binary = SizeToBin(lc_text);
+	binary = convert_size_to_bin(lc_text);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 	free(binary);
-	binary = SizeToBin(lc_data);
+	binary = convert_size_to_bin(lc_data);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 	free(binary);
 
@@ -171,9 +171,8 @@ int main(int argc, char** argv)
 	{
 		int idx = -1;
 		int b_target; // address of branch target
-		//char* tmp;
-		//char* tmp_immd;  
-		//char* tmp_reg;
+		char* immd_str;  
+		char* rs_str;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc_text);
@@ -190,9 +189,9 @@ int main(int argc, char** argv)
 						// only unsigned operations
 						fr.op = 0;
 						fr.rs = 0;
-						fr.rt = convert_to_int(arg3);
-						fr.rd = convert_to_int(arg2);
-						fr.shamt = convert_to_int(arg4);
+						fr.rt = convert_str_to_int(arg3);
+						fr.rd = convert_str_to_int(arg2);
+						fr.shamt = convert_str_to_int(arg4);
 						fr.funct = 0;
 						binary = make_r_format_binary(&fr);
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
@@ -204,9 +203,9 @@ int main(int argc, char** argv)
 						// only unsigned operations
 						fr.op = 0;
 						fr.rs = 0;
-						fr.rt = convert_to_int(arg3);
-						fr.rd = convert_to_int(arg2);
-						fr.shamt = convert_to_int(arg4);
+						fr.rt = convert_str_to_int(arg3);
+						fr.rd = convert_str_to_int(arg2);
+						fr.shamt = convert_str_to_int(arg4);
 						fr.funct = 2;
 						binary = make_r_format_binary(&fr);
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
@@ -216,7 +215,7 @@ int main(int argc, char** argv)
 
 					case 8: // jr
 						fr.op = 0;
-						fr.rs = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg2);
 						fr.rt = 0;
 						fr.rd = 0;
 						fr.shamt = 0;
@@ -230,9 +229,9 @@ int main(int argc, char** argv)
 					case 33: // addu
 						// only unsigned operations
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 33;
 						binary = make_r_format_binary(&fr);
@@ -244,9 +243,9 @@ int main(int argc, char** argv)
 					case 35: // subu
 						//// only unsigned operations
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 35;
 						binary = make_r_format_binary(&fr);
@@ -257,9 +256,9 @@ int main(int argc, char** argv)
 
 					case 36: // and
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 36;
 						binary = make_r_format_binary(&fr);
@@ -270,9 +269,9 @@ int main(int argc, char** argv)
 
 					case 37: // or
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 37;
 						binary = make_r_format_binary(&fr);
@@ -283,9 +282,9 @@ int main(int argc, char** argv)
 
 					case 39: // nor
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 39;
 						binary = make_r_format_binary(&fr);
@@ -297,9 +296,9 @@ int main(int argc, char** argv)
 					case 43: // sltu
 						// only unsigned operations
 						fr.op = 0;
-						fr.rs = convert_to_int(arg3);
-						fr.rt = convert_to_int(arg4);
-						fr.rd = convert_to_int(arg2);
+						fr.rs = convert_str_to_int(arg3);
+						fr.rt = convert_str_to_int(arg4);
+						fr.rd = convert_str_to_int(arg2);
 						fr.shamt = 0;
 						fr.funct = 43;
 						binary = make_r_format_binary(&fr);
@@ -319,8 +318,8 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
 							fi.op = 4;
-							fi.rs = convert_to_int(arg2);
-							fi.rt = convert_to_int(arg3);
+							fi.rs = convert_str_to_int(arg2);
+							fi.rt = convert_str_to_int(arg3);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
@@ -331,8 +330,8 @@ int main(int argc, char** argv)
 							 * set 0 as address of operand & alert error flag to user
 							 */
 							fi.op = 4;
-							fi.rs = convert_to_int(arg2);
-							fi.rt = convert_to_int(arg3);
+							fi.rs = convert_str_to_int(arg2);
+							fi.rt = convert_str_to_int(arg3);
 							fi.immd = 0;
 							binary = make_i_format_binary(&fi);
 							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
@@ -347,16 +346,16 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 5;
-							fi.rs = convert_to_int(arg2);
-							fi.rt = convert_to_int(arg3);
+							fi.rs = convert_str_to_int(arg2);
+							fi.rt = convert_str_to_int(arg3);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
 						else  
 						{
 							fi.op = 5;
-							fi.rs = convert_to_int(arg2);
-							fi.rt = convert_to_int(arg3);
+							fi.rs = convert_str_to_int(arg2);
+							fi.rt = convert_str_to_int(arg3);
 							fi.immd = 0;
 							binary = make_i_format_binary(&fi);
 							fprintf(stderr, "Error: There is no matched operand in symbol table: %s\n", arg1);
@@ -370,16 +369,16 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 9;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
 						else // if constant 
 						{
 							fi.op = 9;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
@@ -392,16 +391,16 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 11;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
 						else // if constant 
 						{
 							fi.op = 11;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
@@ -413,16 +412,16 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 12;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
-						else // if constant 
+						else 
 						{
 							fi.op = 12;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
@@ -434,16 +433,16 @@ int main(int argc, char** argv)
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 13;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
-						else // if constant 
+						else 
 						{
 							fi.op = 13;
-							fi.rs = convert_to_int(arg3);
-							fi.rt = convert_to_int(arg2);
+							fi.rs = convert_str_to_int(arg3);
+							fi.rt = convert_str_to_int(arg2);
 							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
@@ -452,28 +451,38 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 15: // lui
-						//if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) 
-						//{
-							//binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									//OffsetToBin((b_target - lc_text - 4) / 4));
-						//}
-						//else 
-						//{
-							//binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									//OffsetToBin(convert_str_to_int(arg3)));
-						//}
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
+						{
+							fi.op = 15;
+							fi.rs = 0;
+							fi.rt = convert_str_to_int(arg2);
+							fi.immd = ((b_target - lc_text - 4) / 4);
+							binary = make_i_format_binary(&fi);
+						}
+						else // if constant 
+						{
+							fi.op = 15;
+							fi.rs = 0;
+							fi.rt = convert_str_to_int(arg2);
+							fi.immd = convert_const_to_int(arg4);
+							binary = make_i_format_binary(&fi);
+						}
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 					case 35: // lw
 						//immediate field are sign extended to allow negative
-						//tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
-						//tmp_reg = getRegister(arg3); // filter arg3 for register
-						//binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(convert_str_to_int(tmp_immd)));
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						immd_str = getImmediate(arg3); // filter arg3 for immmediate
+						rs_str = getRegister(arg3); // filter arg3 for register number
+						fi.op = 35;
+						fi.rs = convert_str_to_int(rs_str);
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = convert_str_to_int(immd_str);
+						binary = make_i_format_binary(&fi);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
@@ -583,7 +592,7 @@ int main(int argc, char** argv)
 }
 
 /**
- * @brief get register string from argument
+ * @brief get register integer number from argument
  * @param char* $arg 
  * @return char*
  */
@@ -593,6 +602,7 @@ char* getRegister(char* arg)
 	strncpy(tmp, arg, (strlen(arg) + 1));
 	tmp = strtok(tmp, "(");
 	tmp = strtok(NULL, "(");
+
 	return tmp;
 }
 
@@ -722,10 +732,16 @@ int convert_const_to_int(char* arg)
 	regex_t rg_hex;
 	int rt = regcomp(&rg_hex, "[0][x]", 0);
 	rt = regexec(&rg_hex, arg, 0, NULL, 0); // execute regexec
-	if(!rt) // if hex
+	if(!rt) // if hex 
+	{
+		regfree(&rg_hex);
 		return (int)strtol(arg, NULL, 16);
-	else // if dec
+	}
+	else // if dec 
+	{
+		regfree(&rg_hex);
 		return (int)strtol(arg, NULL, 10);
+	}
 }
 
 /**
@@ -734,7 +750,7 @@ int convert_const_to_int(char* arg)
  * @param int $tl target location counter
  * @return void
  */
-char* SizeToBin(int arg)
+char* convert_size_to_bin(int arg)
 {
 	char* tmp = (char*)malloc(sizeof(char) * 33);
 	for(int i = 31; i >= 0; i--)
@@ -753,7 +769,7 @@ char* SizeToBin(int arg)
  * @param char* $arg
  * @return int
  */
-int convert_to_int(char* arg)
+int convert_str_to_int(char* arg)
 {
 	int nReg = 0;
 	arg = strtok(arg, "$");
@@ -787,7 +803,7 @@ int opHashFunc(Key k)
  * @brief predefined R format operation table
  * @param HashTable* ot
  */
-void set_rOpTab(HashTable* ot)
+void set_R_optab(HashTable* ot)
 {
 	// total 9 operators
 	HashInsert(ot, 0x21, "addu");
@@ -805,7 +821,7 @@ void set_rOpTab(HashTable* ot)
  * @brief predefined I format operation table
  * @param HashTable* ot
  */
-void set_iOpTab(HashTable* ot)
+void set_I_optab(HashTable* ot)
 {
 	// total 10 operators
 	HashInsert(ot, 0x09, "addiu");
@@ -823,7 +839,7 @@ void set_iOpTab(HashTable* ot)
  * @brief predefined J format operation table
  * @param HashTable* ot
  */
-void set_jOpTab(HashTable* ot)
+void set_J_optab(HashTable* ot)
 {
 	// total 2 operators
 	HashInsert(ot, 0x03, "jal");
