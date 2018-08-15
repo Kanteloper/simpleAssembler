@@ -119,15 +119,19 @@ int main(int argc, char** argv)
 			if(strcmp(arg1, ".data") > 0 && strcmp(arg1, ".text") > 0)
 			{
 				label = strtok(arg1, ":");
-				if(strcmp(arg2, ".word") == 0 || strcmp(arg1, ".word") == 0) // if label in data section 
+				if(strcmp(arg2, ".word") == 0) // if label in data section 
 				{	
-					//printf("%s, %d\n", arg1, lc_data);
+					puts(arg3);
 
 					//convert default value of data to binary 
 					//save those to another buffer
 
-
 					HashInsert(symTab, lc_data, label); // store label
+					lc_data += 4;
+				}
+				else if(strcmp(arg1, ".word") == 0)
+				{
+					puts(arg2);
 					lc_data += 4;
 				}
 				else // if label in text section
@@ -574,7 +578,6 @@ int main(int argc, char** argv)
 						fi.rt = convert_str_to_int(arg2);
 						fi.immd = 0x1000;
 						binary = make_i_format_binary(&fi);
-						puts(binary);
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
 						free(binary);
