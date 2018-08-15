@@ -36,6 +36,7 @@ typedef struct _i_struct
 	unsigned int rs;
 	unsigned int rt;
 	int immd;
+	unsigned int unsign_immd; // for addiu, sltiu
 } format_I;
 
 typedef struct _j_struct
@@ -144,7 +145,6 @@ int main(int argc, char** argv)
 				}
 				else // if label in text section
 				{
-					//printf("%s, %d\n", arg1, lc_text);
 					HashInsert(symTab, lc_text, label); // store label
 				}
 			}
@@ -154,12 +154,10 @@ int main(int argc, char** argv)
 			// if the lower 16bits address is not 0x0000
 			if(strcmp(arg1, "la") == 0 && getHashAddr(symTab, 0, arg3) != 0)
 			{
-				//printf("%s, %d\n", arg1, lc_text);
 				lc_text += 8;
 			}
 			else
 			{
-				//printf("%s, %d\n", arg1, lc_text);
 				lc_text += 4;
 			}
 		}
@@ -186,7 +184,6 @@ int main(int argc, char** argv)
 		int b_target; // address of branch target
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
-		//printf("%s, %d\n", arg1, lc_text);
 		rt_lb = regexec(&rg_lb, arg1, 0, NULL, 0); // execute regexec
 		if(rt_lb) // if arg1 label
 		{
@@ -197,7 +194,6 @@ int main(int argc, char** argv)
 				{
 					//convert each instruction to binary
 					case 0: // sll
-						// only unsigned operations
 						fr.op = 0;
 						fr.rs = 0;
 						fr.rt = convert_str_to_int(arg3);
@@ -211,7 +207,6 @@ int main(int argc, char** argv)
 						break;
 
 					case 2: // srl
-						// only unsigned operations
 						fr.op = 0;
 						fr.rs = 0;
 						fr.rt = convert_str_to_int(arg3);
@@ -238,7 +233,6 @@ int main(int argc, char** argv)
 						break;
 
 					case 33: // addu
-						// only unsigned operations
 						fr.op = 0;
 						fr.rs = convert_str_to_int(arg3);
 						fr.rt = convert_str_to_int(arg4);
@@ -252,7 +246,6 @@ int main(int argc, char** argv)
 						break;
 
 					case 35: // subu
-						//// only unsigned operations
 						fr.op = 0;
 						fr.rs = convert_str_to_int(arg3);
 						fr.rt = convert_str_to_int(arg4);
@@ -324,7 +317,6 @@ int main(int argc, char** argv)
 				switch(i_key[idx])
 				{
 					case 4: // beq
-						//immediate field are sign extended to allow negative
 						// search symbol as operand
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
@@ -353,7 +345,6 @@ int main(int argc, char** argv)
 						break;
 
 					case 5: // bne
-						//immediate field are sign extended to allow negative
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 5;
@@ -376,13 +367,12 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 9: // addiu
-						// only unsigned operations
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 9;
 							fi.rs = convert_str_to_int(arg3);
 							fi.rt = convert_str_to_int(arg2);
-							fi.immd = ((b_target - lc_text - 4) / 4);
+							fi.unsign_immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
 						else // if constant 
@@ -398,13 +388,12 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 11: // sltiu
-						// only unsigned operations
 						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 11;
 							fi.rs = convert_str_to_int(arg3);
 							fi.rt = convert_str_to_int(arg2);
-							fi.immd = ((b_target - lc_text - 4) / 4);
+							fi.unsign_immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
 						}
 						else // if constant 
@@ -483,7 +472,6 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 35: // lw
-						//immediate field are sign extended to allow negative
 						fi.op = 35;
 						fi.rs = get_register_number(arg3);
 						fi.rt = convert_str_to_int(arg2);
@@ -494,7 +482,6 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 43: // sw
-						//immediate field are sign extended to allow negative
 						fi.op = 35;
 						fi.rs = get_register_number(arg3);
 						fi.rt = convert_str_to_int(arg2);
@@ -609,14 +596,14 @@ int main(int argc, char** argv)
 		arg2[0] = '\0'; // flush arg2  
 	} // second pass end
 
-
 	// append to default data value buffer
 	strncat(buffer, buf_data, (strlen(buffer) + strlen(buf_data) + 1)); 
 
-	// output object FILE
+	// make object file name
 	strncat(object_file, file_name, strlen(object_file) + strlen(file_name) + 1);
 	strncat(object_file, ".o", strlen(object_file) + 3);
 
+	// output object FILE
 	o_fp = fopen(object_file, "w+");
 	fputs(buffer, o_fp);
 
