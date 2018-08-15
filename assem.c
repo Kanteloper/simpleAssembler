@@ -38,8 +38,8 @@ typedef struct _i_struct
 
 typedef struct _j_struct
 {
-	char op[7];
-	char addr[27];
+	unsigned int op;
+	int addr;
 } format_J;
 
 int symHashFunc(Key k);
@@ -472,21 +472,24 @@ int main(int argc, char** argv)
 					case 35: // lw
 						//immediate field are sign extended to allow negative
 						fi.op = 35;
-						get_register_number(arg3);
-						printf("%d\n", get_immediate_number(arg3));
-						//binary = make_i_format_binary(&fi);
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						fi.rs = get_register_number(arg3);
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = get_immediate_number(arg3);
+						binary = make_i_format_binary(&fi);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
-						//tmp_immd = getImmediate(arg3);  filter arg3 for immmediate
-						//tmp_reg = getRegister(arg3);  filter arg3 for register
-						//binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						fi.op = 35;
+						fi.rs = get_register_number(arg3);
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = get_immediate_number(arg3);
+						binary = make_i_format_binary(&fi);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 				}
 			} // i format table search end
@@ -498,14 +501,14 @@ int main(int argc, char** argv)
 					case 2: // j
 						//if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
 						//{
-						//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
+						////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						//}
 						//else // if not found
 						//{
-						//// error
-						//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
-						//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						////// error
+						////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
+						////fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
 						//}
 						lc_text += 4;
 						//free(binary);
@@ -647,6 +650,17 @@ char* make_i_format_binary(format_I* fi)
 	}
 	bin[32] = '\0';
 	return bin;
+}
+
+/**
+ * @brief make J instruction format binary code
+ * @param format_J* $fj
+ * @return char*
+ */
+char* make_j_format_binary(format_J* fj)
+{
+	char* bin = malloc(sizeof(char) * 33);
+	unsigned int tmp = fj->op << 26 | fj-> 
 }
 
 /**
