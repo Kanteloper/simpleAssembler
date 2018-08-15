@@ -50,13 +50,12 @@ void set_iOpTab(HashTable* ot);
 void set_jOpTab(HashTable* ot);
 char* make_r_format_binary(format_R* fr);
 char* make_i_format_binary(format_I* fi);
-char* OffsetToBin(int arg);
 char* SizeToBin(int arg);
-int isRformat(HashTable* ht, int* rk, char* arg);
-int isIformat(HashTable* ht, int* ik, char* arg);
+int is_R_format(HashTable* ht, int* rk, char* arg);
+int is_I_format(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
-int isOperand(HashTable* ht, int num, char* oprn);
-int strToInt(char* arg);
+int is_operand(HashTable* ht, int num, char* oprn);
+int convert_const_to_int(char* arg);
 char* getImmediate(char* arg);
 char* getRegister(char* arg);
 
@@ -182,7 +181,7 @@ int main(int argc, char** argv)
 		if(rt_lb) // if arg1 label
 		{
 			// search each opTab
-			if((idx = isRformat(rOpTab, r_key, arg1)) != -1) // if R format instruction
+			if((idx = is_R_format(rOpTab, r_key, arg1)) != -1) // if R format instruction
 			{
 				switch(r_key[idx])
 				{
@@ -310,14 +309,14 @@ int main(int argc, char** argv)
 						break;
 				}
 			} // r format opTab search end
-			else if((idx = isIformat(iOpTab, i_key, arg1)) != -1) // if I format instruction 
+			else if((idx = is_I_format(iOpTab, i_key, arg1)) != -1) // if I format instruction 
 			{
 				switch(i_key[idx])
 				{
 					case 4: // beq
 						//immediate field are sign extended to allow negative
 						// search symbol as operand
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) // if found
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1) // if found
 						{
 							fi.op = 4;
 							fi.rs = convert_to_int(arg2);
@@ -345,7 +344,7 @@ int main(int argc, char** argv)
 
 					case 5: // bne
 						//immediate field are sign extended to allow negative
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 5;
 							fi.rs = convert_to_int(arg2);
@@ -368,7 +367,7 @@ int main(int argc, char** argv)
 						break;
 					case 9: // addiu
 						// only unsigned operations
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 9;
 							fi.rs = convert_to_int(arg3);
@@ -381,7 +380,7 @@ int main(int argc, char** argv)
 							fi.op = 9;
 							fi.rs = convert_to_int(arg3);
 							fi.rt = convert_to_int(arg2);
-							fi.immd = strToInt(arg4);
+							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
@@ -390,7 +389,7 @@ int main(int argc, char** argv)
 						break;
 					case 11: // sltiu
 						// only unsigned operations
-						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
 						{
 							fi.op = 11;
 							fi.rs = convert_to_int(arg3);
@@ -403,7 +402,7 @@ int main(int argc, char** argv)
 							fi.op = 11;
 							fi.rs = convert_to_int(arg3);
 							fi.rt = convert_to_int(arg2);
-							fi.immd = strToInt(arg4);
+							fi.immd = convert_const_to_int(arg4);
 							binary = make_i_format_binary(&fi);
 						}
 						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
@@ -411,7 +410,7 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 12: // andi
-						//if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
+						//if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1) 
 						//{
 							//binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
 									//OffsetToBin((b_target - lc_text - 4) / 4));
@@ -419,7 +418,7 @@ int main(int argc, char** argv)
 						//else 
 						//{
 							//binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									//OffsetToBin(strToInt(arg4)));
+									//OffsetToBin(convert_str_to_int(arg4)));
 						//}
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
@@ -434,7 +433,7 @@ int main(int argc, char** argv)
 						//else 
 						//{
 							//binary = makeIformBinary("001101", RegToBin(arg3), RegToBin(arg2), 
-									//OffsetToBin(strToInt(arg4)));
+									//OffsetToBin(convert_str_to_int(arg4)));
 						//}
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
@@ -449,7 +448,7 @@ int main(int argc, char** argv)
 						//else 
 						//{
 							//binary = makeIformBinary("001111", "00000", RegToBin(arg2), 
-									//OffsetToBin(strToInt(arg3)));
+									//OffsetToBin(convert_str_to_int(arg3)));
 						//}
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
@@ -459,7 +458,7 @@ int main(int argc, char** argv)
 						//immediate field are sign extended to allow negative
 						//tmp_immd = getImmediate(arg3); // filter arg3 for immmediate
 						//tmp_reg = getRegister(arg3); // filter arg3 for register
-						//binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+						//binary = makeIformBinary("100011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(convert_str_to_int(tmp_immd)));
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
 						//free(binary);
@@ -643,7 +642,7 @@ char* make_i_format_binary(format_I* fi)
  * @param char* oprn
  * @return int
  */
-int isOperand(HashTable* ht, int num, char* oprn)
+int is_operand(HashTable* ht, int num, char* oprn)
 {
 	int target = 0;
 	for(int i = 0; i < num; i++)
@@ -660,7 +659,7 @@ int isOperand(HashTable* ht, int num, char* oprn)
  * @param char* $arg
  * @return int
  */
-int isRformat(HashTable* ht, int* rk, char* arg)
+int is_R_format(HashTable* ht, int* rk, char* arg)
 {
 	for(int i = 0; i < 9; i++)
 	{
@@ -676,7 +675,7 @@ int isRformat(HashTable* ht, int* rk, char* arg)
  * @param char* arg
  * @return int
  */
-int isIformat(HashTable* ht, int* ik, char* arg)
+int is_I_format(HashTable* ht, int* ik, char* arg)
 {
 	for(int i = 0; i < 9; i++)
 	{
@@ -706,7 +705,7 @@ int isJformat(HashTable* ht, int* jk, char* arg)
  * @param char* arg
  * @return int
  */
-int strToInt(char* arg)
+int convert_const_to_int(char* arg)
 {
 	regex_t rg_hex;
 	int rt = regcomp(&rg_hex, "[0][x]", 0);
@@ -715,24 +714,6 @@ int strToInt(char* arg)
 		return (int)strtol(arg, NULL, 16);
 	else // if dec
 		return (int)strtol(arg, NULL, 10);
-}
-
-/**
- * @brief return integer input to string represented binary 
- *		  for offset
- * @param int $tl target location counter
- * @return void
- */
-char* OffsetToBin(int arg)
-{
-	char* tmp = (char*)malloc(sizeof(char) * 17);
-	for(int i = 15; i >= 0; i--)
-	{
-		tmp[i] = (arg & 1) + '0'; 
-		arg >>= 1;
-	}
-	tmp[16] = '\0';
-	return tmp;
 }
 
 /**
