@@ -352,7 +352,6 @@ int main(int argc, char** argv)
 							fi.rt = convert_to_int(arg3);
 							fi.immd = ((b_target - lc_text - 4) / 4);
 							binary = make_i_format_binary(&fi);
-							puts(binary);
 						}
 						else  
 						{
@@ -369,19 +368,25 @@ int main(int argc, char** argv)
 						break;
 					case 9: // addiu
 						// only unsigned operations
-						//if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
-						//{
-						//binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-						//OffsetToBin((b_target - lc_text - 4) / 4));
-						//}
-						//else // if constant
-						//{
-						//binary = makeIformBinary("001001", RegToBin(arg3), RegToBin(arg2), 
-						//OffsetToBin(strToInt(arg4)));
-						//}
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1)
+						{
+							fi.op = 9;
+							fi.rs = convert_to_int(arg3);
+							fi.rt = convert_to_int(arg2);
+							fi.immd = ((b_target - lc_text - 4) / 4);
+							binary = make_i_format_binary(&fi);
+						}
+						else // if constant 
+						{
+							fi.op = 9;
+							fi.rs = convert_to_int(arg3);
+							fi.rt = convert_to_int(arg2);
+							fi.immd = strToInt(arg4);
+							binary = make_i_format_binary(&fi);
+						}
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 					case 11: // sltiu
 						// only unsigned operations
