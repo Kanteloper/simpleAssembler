@@ -51,7 +51,7 @@ void set_J_optab(HashTable* ot);
 char* make_r_format_binary(format_R* fr);
 char* make_i_format_binary(format_I* fi);
 char* make_j_format_binary(format_J* fj);
-char* convert_size_to_bin(int arg);
+char* convert_int_to_bin(int arg);
 int is_R_format(HashTable* ht, int* rk, char* arg);
 int is_I_format(HashTable* ht, int* ik, char* arg);
 int is_j_format(HashTable* ht, int* jk, char* arg);
@@ -121,8 +121,7 @@ int main(int argc, char** argv)
 				label = strtok(arg1, ":");
 				if(strcmp(arg2, ".word") == 0) // if label in data section 
 				{	
-					puts(arg3);
-
+				
 					//convert default value of data to binary 
 					//save those to another buffer
 
@@ -131,7 +130,6 @@ int main(int argc, char** argv)
 				}
 				else if(strcmp(arg1, ".word") == 0)
 				{
-					puts(arg2);
 					lc_data += 4;
 				}
 				else // if label in text section
@@ -161,10 +159,10 @@ int main(int argc, char** argv)
 
 	// convert data and text section size to binary
 	// And, save those to buffer
-	binary = convert_size_to_bin(lc_text);
+	binary = convert_int_to_bin(lc_text);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 	free(binary);
-	binary = convert_size_to_bin(lc_data);
+	binary = convert_int_to_bin(lc_data);
 	strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1));
 	free(binary);
 
@@ -796,7 +794,7 @@ int convert_const_to_int(char* arg)
  * @param int $tl target location counter
  * @return void
  */
-char* convert_size_to_bin(int arg)
+char* convert_int_to_bin(int arg)
 {
 	char* tmp = (char*)malloc(sizeof(char) * 33);
 	for(int i = 31; i >= 0; i--)
