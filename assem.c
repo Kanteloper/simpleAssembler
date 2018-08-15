@@ -56,8 +56,8 @@ int is_I_format(HashTable* ht, int* ik, char* arg);
 int isJformat(HashTable* ht, int* jk, char* arg);
 int is_operand(HashTable* ht, int num, char* oprn);
 int convert_const_to_int(char* arg);
-char* getImmediate(char* arg);
-char* getRegister(char* arg);
+int get_immediate_number(char* arg);
+int get_register_number(char* arg);
 
 int main(int argc, char** argv)
 {
@@ -171,8 +171,6 @@ int main(int argc, char** argv)
 	{
 		int idx = -1;
 		int b_target; // address of branch target
-		char* immd_str;  
-		char* rs_str;
 
 		sscanf(line, "%s%s%s%s", arg1, arg2, arg3, arg4 );
 		//printf("%s, %d\n", arg1, lc_text);
@@ -473,22 +471,19 @@ int main(int argc, char** argv)
 						break;
 					case 35: // lw
 						//immediate field are sign extended to allow negative
-						immd_str = getImmediate(arg3); // filter arg3 for immmediate
-						rs_str = getRegister(arg3); // filter arg3 for register number
 						fi.op = 35;
-						fi.rs = convert_str_to_int(rs_str);
-						fi.rt = convert_str_to_int(arg2);
-						fi.immd = convert_str_to_int(immd_str);
-						binary = make_i_format_binary(&fi);
-						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						get_register_number(arg3);
+						printf("%d\n", get_immediate_number(arg3));
+						//binary = make_i_format_binary(&fi);
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						free(binary);
+						//free(binary);
 						break;
 					case 43: // sw
 						//immediate field are sign extended to allow negative
 						//tmp_immd = getImmediate(arg3);  filter arg3 for immmediate
-							//tmp_reg = getRegister(arg3);  filter arg3 for register
-							//binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
+						//tmp_reg = getRegister(arg3);  filter arg3 for register
+						//binary = makeIformBinary("101011", RegToBin(tmp_reg) , RegToBin(arg2),	OffsetToBin(strToInt(tmp_immd)));
 						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
 						//free(binary);
@@ -503,14 +498,14 @@ int main(int argc, char** argv)
 					case 2: // j
 						//if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
 						//{
-							//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
-							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						//}
 						//else // if not found
 						//{
-							//// error
-							//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
-							//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						//// error
+						//binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
+						//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
 						//}
 						lc_text += 4;
 						//free(binary);
@@ -519,14 +514,14 @@ int main(int argc, char** argv)
 					case 3: // jal
 						//if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
 						//{
-							//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
-							//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
+						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						//}
 						//else // if not found
 						//{
-							//// error
-							//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
-							//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						//// error
+						//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
+						//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
 						//}
 						lc_text += 4;
 						//free(binary);
@@ -569,7 +564,7 @@ int main(int argc, char** argv)
 		} // done operator found
 
 		arg2[0] = '\0'; // flush arg2  
-	} // while end
+	} // second pass end
 
 
 	// append to default data value  buffer
@@ -594,29 +589,26 @@ int main(int argc, char** argv)
 /**
  * @brief get register integer number from argument
  * @param char* $arg 
- * @return char*
+ * @return int
  */
-char* getRegister(char* arg)
+int get_register_number(char* arg)
 {
-	char* tmp = malloc(sizeof(char) * (strlen(arg) + 1));
-	strncpy(tmp, arg, (strlen(arg) + 1));
-	tmp = strtok(tmp, "(");
-	tmp = strtok(NULL, "(");
-
-	return tmp;
+	arg = strtok(arg, "(");
+	arg = strtok(NULL, "(");
+	arg = strtok(arg, "$");
+	arg = strtok(arg, ")");
+	return atoi(arg);
 }
 
 /**
- * @brief get immediate string from argument
+ * @brief get immediate integer from argument
  * @param char* $arg
- * @return char*
+ * @return int
  */
-char* getImmediate(char* arg)
+int get_immediate_number(char* arg)
 {
-	char* tmp = malloc(sizeof(char) * (strlen(arg) + 1));
-	strncpy(tmp, arg, (strlen(arg) + 1));
-	tmp = strtok(tmp, "(");
-	return tmp;
+	arg = strtok(arg, "(");
+	return atoi(arg);
 }
 
 /**
@@ -771,12 +763,10 @@ char* convert_size_to_bin(int arg)
  */
 int convert_str_to_int(char* arg)
 {
-	int nReg = 0;
 	arg = strtok(arg, "$");
 	arg = strtok(arg, ",");
 	arg = strtok(arg, ")");
-	nReg = atoi(arg);
-	return nReg;
+	return atoi(arg);
 }
 
 /**
