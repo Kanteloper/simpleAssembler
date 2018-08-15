@@ -33,7 +33,7 @@ typedef struct _i_struct
 	unsigned int op;
 	unsigned int rs;
 	unsigned int rt;
-	short immd;
+	int immd;
 } format_I;
 
 typedef struct _j_struct
@@ -549,30 +549,48 @@ int main(int argc, char** argv)
 					if(b_target != 0) // if lower 16bits not 0x0000
 					{
 						// lui
-						//binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//// ori
-						//binary = makeIformBinary("001101", RegToBin(arg2), RegToBin(arg2), OffsetToBin(b_target));
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						fi.op = 15;
+						fi.rs = 0;
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = 0x1000;
+						binary = make_i_format_binary(&fi);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						free(binary);
+						// ori
+						fi.op = 13;
+						fi.rs = convert_str_to_int(arg2);
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = b_target;
+						binary = make_i_format_binary(&fi);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 8;
-						//free(binary);
+						free(binary);
 					}
 					else // if lower 16bits 0x0000
 					{
 						// lui
-						//binary = makeIformBinary("001111", "00000", RegToBin(arg2), "0001000000000000");
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						fi.op = 15;
+						fi.rs = 0;
+						fi.rt = convert_str_to_int(arg2);
+						fi.immd = 0x1000;
+						binary = make_i_format_binary(&fi);
+						puts(binary);
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 					}
 				}
 				else // error 
 				{
-					//binary = makeIformBinary("000000", "00000", "00000", OffsetToBin(0));
-					//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-					//fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
+					fi.op = 0;
+					fi.rs = 0;
+					fi.rt = 0;
+					fi.immd = 0;
+					binary = make_i_format_binary(&fi);
+					strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+					fprintf(stderr, "Error: There is no matched symbol or address is wrong\n");
 					lc_text += 4;
-					//free(binary);
+					free(binary);
 				}
 			}
 		} // done operator found
