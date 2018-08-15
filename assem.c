@@ -17,6 +17,8 @@
 #define LINE_MAX 30
 #define STR_MAX 20
 #define BUF_MAX 1000 
+#define DATA_MAX 500
+#define NAME_MAX 20
 
 typedef struct _r_struct
 {
@@ -62,7 +64,7 @@ int get_register_number(char* arg);
 
 int main(int argc, char** argv)
 {
-	FILE *fp;
+	FILE *fp, *o_fp;
 	char line[STR_MAX];
 	char arg1[STR_MAX] = {};
 	char arg2[STR_MAX] = {}; 
@@ -80,7 +82,10 @@ int main(int argc, char** argv)
 	HashTable* jOpTab; // operator table for J format instruction
 	HashTable* symTab; // symbol table
 	char buffer[BUF_MAX] = {}; // buffer for file output
+	char buf_data[DATA_MAX] = {}; // buffer for default data in data section
+	char object_file[NAME_MAX] = {}; // object file name
 	char* binary; // for binary code
+	char* file_name; // assembly file name
 	format_R fr;
 	format_I fi;
 	format_J fj;
@@ -98,6 +103,9 @@ int main(int argc, char** argv)
 		fprintf(stderr, "failed to open a file\n");
 		exit(1);
 	}
+
+	// save file name 
+	file_name = strtok(argv[1], ".");
 
 	// compile regular expression
 	rt_lb = regcomp(&rg_lb, "[:.]", 0); 
@@ -121,16 +129,18 @@ int main(int argc, char** argv)
 				label = strtok(arg1, ":");
 				if(strcmp(arg2, ".word") == 0) // if label in data section 
 				{	
-				
-					//convert default value of data to binary 
-					//save those to another buffer
-
+					binary = convert_int_to_bin(convert_const_to_int(arg3)); // convert default data to binary
+					strncat(buf_data, binary, (strlen(buffer) + strlen(binary) + 1)); // save to data buffer
 					HashInsert(symTab, lc_data, label); // store label
 					lc_data += 4;
+					free(binary);
 				}
 				else if(strcmp(arg1, ".word") == 0)
 				{
+					binary = convert_int_to_bin(convert_const_to_int(arg2)); // convert default data to binary
+					strncat(buf_data, binary, (strlen(buffer) + strlen(binary) + 1)); // save to data buffer
 					lc_data += 4;
+					free(binary);
 				}
 				else // if label in text section
 				{
@@ -600,13 +610,20 @@ int main(int argc, char** argv)
 	} // second pass end
 
 
-	// append to default data value  buffer
+	// append to default data value buffer
+	strncat(buffer, buf_data, (strlen(buffer) + strlen(buf_data) + 1)); 
 
-	puts(buffer);
+	// output object FILE
+	strncat(object_file, file_name, strlen(object_file) + strlen(file_name) + 1);
+	strncat(object_file, ".o", strlen(object_file) + 3);
 
-	// output object file
+	o_fp = fopen(object_file, "w+");
+	fputs(buffer, o_fp);
+
+	puts("process complete!!");
 
 	fclose(fp);
+	fclose(o_fp);
 	regfree(&rg_lb); // free regex
 	freeHashList(TB_MAX, rOpTab->list); // free linkedList in rOpTab
 	free(rOpTab); // free rOpTab HashTable
@@ -616,6 +633,7 @@ int main(int argc, char** argv)
 	free(jOpTab);
 	freeHashList(TB_MAX, symTab->list); // free linkedList in symTab
 	free(symTab); // free symTab HashTable
+
 	return 0;
 }
 
