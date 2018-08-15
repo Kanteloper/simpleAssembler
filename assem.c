@@ -410,19 +410,25 @@ int main(int argc, char** argv)
 						free(binary);
 						break;
 					case 12: // andi
-						//if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1) 
-						//{
-							//binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									//OffsetToBin((b_target - lc_text - 4) / 4));
-						//}
-						//else 
-						//{
-							//binary = makeIformBinary("001100", RegToBin(arg3), RegToBin(arg2), 
-									//OffsetToBin(convert_str_to_int(arg4)));
-						//}
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						if((b_target = is_operand(symTab, TB_MAX, arg4)) != -1)
+						{
+							fi.op = 12;
+							fi.rs = convert_to_int(arg3);
+							fi.rt = convert_to_int(arg2);
+							fi.immd = ((b_target - lc_text - 4) / 4);
+							binary = make_i_format_binary(&fi);
+						}
+						else // if constant 
+						{
+							fi.op = 12;
+							fi.rs = convert_to_int(arg3);
+							fi.rt = convert_to_int(arg2);
+							fi.immd = convert_const_to_int(arg4);
+							binary = make_i_format_binary(&fi);
+						}
+						strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 					case 13: // ori
 						//if((b_target = isOperand(symTab, TB_MAX, arg4)) != -1) 
@@ -514,7 +520,7 @@ int main(int argc, char** argv)
 			} // j format table search end
 			else // la
 			{
-				if((b_target = isOperand(symTab, TB_MAX, arg3)) != -1) // if operand is symbol
+				if((b_target = is_operand(symTab, TB_MAX, arg3)) != -1) // if operand is symbol
 				{
 					if(b_target != 0) // if lower 16bits not 0x0000
 					{
