@@ -50,10 +50,11 @@ void set_I_optab(HashTable* ot);
 void set_J_optab(HashTable* ot);
 char* make_r_format_binary(format_R* fr);
 char* make_i_format_binary(format_I* fi);
+char* make_j_format_binary(format_J* fj);
 char* convert_size_to_bin(int arg);
 int is_R_format(HashTable* ht, int* rk, char* arg);
 int is_I_format(HashTable* ht, int* ik, char* arg);
-int isJformat(HashTable* ht, int* jk, char* arg);
+int is_j_format(HashTable* ht, int* jk, char* arg);
 int is_operand(HashTable* ht, int num, char* oprn);
 int convert_const_to_int(char* arg);
 int get_immediate_number(char* arg);
@@ -493,41 +494,51 @@ int main(int argc, char** argv)
 						break;
 				}
 			} // i format table search end
-			else if((idx = isJformat(jOpTab, j_key, arg1)) != -1) // if I format instruction 
+			else if((idx = is_j_format(jOpTab, j_key, arg1)) != -1) // if I format instruction 
 			{
 				int address = 0;
 				switch(j_key[idx])
 				{
 					case 2: // j
-						//if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
-						//{
-						////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(address >> 2));
-						////strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//}
-						//else // if not found
-						//{
-						////// error
-						////binary = makeIformBinary("000010", "00000" , "10000", OffsetToBin(0));
-						////fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
-						//}
+						if((address = is_operand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+						{
+							fj.op = 2;
+							fj.addr = address >> 2;
+							binary = make_j_format_binary(&fj);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						}
+						else // if not found
+						{
+							// error
+							fj.op = 2;
+							fj.addr = 0;
+							binary = make_j_format_binary(&fj);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						}
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 
 					case 3: // jal
-						//if((address = isOperand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
-						//{
-						//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(address >> 2));
-						//strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
-						//}
-						//else // if not found
-						//{
-						//// error
-						//binary = makeIformBinary("000011", "00000" , "10000", OffsetToBin(0));
-						//fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
-						//}
+						if((address = is_operand(symTab, TB_MAX, arg2)) != -1) // if found in symTab
+						{
+							fj.op = 3;
+							fj.addr = address >> 2;
+							binary = make_j_format_binary(&fj);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+						}
+						else // if not found
+						{
+							// error
+							fj.op = 3;
+							fj.addr = 0;
+							binary = make_j_format_binary(&fj);
+							strncat(buffer, binary, (strlen(buffer) + strlen(binary) + 1)); 
+							fprintf(stderr, "Error: There is no match in symbol table: %s\n", arg1);
+						}
 						lc_text += 4;
-						//free(binary);
+						free(binary);
 						break;
 				}
 			} // j format table search end
@@ -660,7 +671,15 @@ char* make_i_format_binary(format_I* fi)
 char* make_j_format_binary(format_J* fj)
 {
 	char* bin = malloc(sizeof(char) * 33);
-	unsigned int tmp = fj->op << 26 | fj-> 
+	unsigned int tmp = 0x100000 | fj->op << 26 | fj->addr;
+
+	for(int i = 31; i >= 0; i--)
+	{
+		bin[i] = (tmp & 1) + '0'; 
+		tmp >>= 1;
+	}
+	bin[32] = '\0';
+	return bin;
 }
 
 /**
@@ -719,7 +738,7 @@ int is_I_format(HashTable* ht, int* ik, char* arg)
  * @param char* arg
  * @return int
  */
-int isJformat(HashTable* ht, int* jk, char* arg)
+int is_j_format(HashTable* ht, int* jk, char* arg)
 {
 	for(int i = 0; i < 2; i++)
 	{
